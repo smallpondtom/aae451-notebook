@@ -255,64 +255,271 @@
         <output>propulsion/engine/yaw-angle-rad</output>
       </pure_gain>
     </channel>
-	
-	<channel name="Engine0_Roll">
+
+    <channel name="Engine0_Roll">
       <pure_gain name="fcs/rudder_to_engine0_roll">
         <input>fcs/aileron-cmd-norm</input>
         <gain>fcs/engine-roll-mix</gain>
         <output>propulsion/engine/roll-angle-rad</output>
       </pure_gain>
     </channel>
-	
-    <channel name="Engine1">
+
+        <channel name="Engine1">
       <pure_gain name="fcs/elevator_to_engine1">
         <input>fcs/elevator-cmd-norm</input>
-        <gain>-fcs/engine-pitch-mix</gain>
+        <gain>fcs/engine-pitch-mix</gain>
       </pure_gain>
       <pure_gain name="fcs/throttle_to_engine1">
         <input>fcs/throttle-cmd-norm</input>
-        <gain>fcs/lift-fan-thrust-mix</gain>
+        <gain>fcs/engine-thrust-mix</gain>
       </pure_gain>
       <summer>
-        <input>fcs/elevator_to_engine1</input>
-        <input>fcs/throttle_to_engine1</input>
-        <output>fcs/throttle-pos-norm[1]</output>
+        <input>fcs/elevator_to_engine0</input>
+        <input>fcs/throttle_to_engine0</input>
+        <output>fcs/throttle-pos-norm</output>
       </summer>
     </channel>
 
-    <channel name="Engine2">
-      <pure_gain name="fcs/aileron_to_engine2">
+    <channel name="Engine1_Yaw">
+      <pure_gain name="fcs/rudder_to_engine1_yaw">
+        <input>fcs/rudder-cmd-norm</input>
+        <gain>fcs/engine-yaw-mix</gain>
+        <output>propulsion/engine/yaw-angle-rad</output>
+      </pure_gain>
+    </channel>
+
+    <channel name="Engine1_Roll">
+      <pure_gain name="fcs/rudder_to_engine1_roll">
         <input>fcs/aileron-cmd-norm</input>
         <gain>fcs/engine-roll-mix</gain>
+        <output>propulsion/engine/roll-angle-rad</output>
+      </pure_gain>
+    </channel>
+      
+          <channel name="Engine2">
+      <pure_gain name="fcs/elevator_to_engine2">
+        <input>fcs/elevator-cmd-norm</input>
+        <gain>fcs/engine-pitch-mix</gain>
       </pure_gain>
       <pure_gain name="fcs/throttle_to_engine2">
         <input>fcs/throttle-cmd-norm</input>
-        <gain>fcs/lift-fan-thrust-mix</gain>
+        <gain>fcs/engine-thrust-mix</gain>
       </pure_gain>
       <summer>
-        <input>fcs/aileron_to_engine2</input>
-        <input>fcs/throttle_to_engine2</input>
-        <output>fcs/throttle-pos-norm[2]</output>
+        <input>fcs/elevator_to_engine0</input>
+        <input>fcs/throttle_to_engine0</input>
+        <output>fcs/throttle-pos-norm</output>
       </summer>
     </channel>
 
-    <channel name="Engine3">
-      <pure_gain name="fcs/aileron_to_engine3">
+    <channel name="Engine2_Yaw">
+      <pure_gain name="fcs/rudder_to_engine2_yaw">
+        <input>fcs/rudder-cmd-norm</input>
+        <gain>fcs/engine-yaw-mix</gain>
+        <output>propulsion/engine/yaw-angle-rad</output>
+      </pure_gain>
+    </channel>
+
+    <channel name="Engine2_Roll">
+      <pure_gain name="fcs/rudder_to_engine2_roll">
         <input>fcs/aileron-cmd-norm</input>
-        <gain>-fcs/engine-roll-mix</gain>
+        <gain>fcs/engine-roll-mix</gain>
+        <output>propulsion/engine/roll-angle-rad</output>
+      </pure_gain>
+    </channel>
+      
+          <channel name="Engine3">
+      <pure_gain name="fcs/elevator_to_engine3">
+        <input>fcs/elevator-cmd-norm</input>
+        <gain>fcs/engine-pitch-mix</gain>
       </pure_gain>
       <pure_gain name="fcs/throttle_to_engine3">
         <input>fcs/throttle-cmd-norm</input>
-        <gain>fcs/lift-fan-thrust-mix</gain>
+        <gain>fcs/engine-thrust-mix</gain>
       </pure_gain>
       <summer>
-        <input>fcs/aileron_to_engine3</input>
-        <input>fcs/throttle_to_engine3</input>
-        <output>fcs/throttle-pos-norm[3]</output>
+        <input>fcs/elevator_to_engine0</input>
+        <input>fcs/throttle_to_engine0</input>
+        <output>fcs/throttle-pos-norm</output>
       </summer>
     </channel>
 
+    <channel name="Engine3_Yaw">
+      <pure_gain name="fcs/rudder_to_engine3_yaw">
+        <input>fcs/rudder-cmd-norm</input>
+        <gain>fcs/engine-yaw-mix</gain>
+        <output>propulsion/engine/yaw-angle-rad</output>
+      </pure_gain>
+    </channel>
 
+    <channel name="Engine3_Roll">
+      <pure_gain name="fcs/rudder_to_engine3_roll">
+        <input>fcs/aileron-cmd-norm</input>
+        <gain>fcs/engine-roll-mix</gain>
+        <output>propulsion/engine/roll-angle-rad</output>
+      </pure_gain>
+    </channel>
+      
+          <channel name="Engine4">
+      <pure_gain name="fcs/elevator_to_engine4">
+        <input>fcs/elevator-cmd-norm</input>
+        <gain>fcs/engine-pitch-mix</gain>
+      </pure_gain>
+      <pure_gain name="fcs/throttle_to_engine4">
+        <input>fcs/throttle-cmd-norm</input>
+        <gain>fcs/engine-thrust-mix</gain>
+      </pure_gain>
+      <summer>
+        <input>fcs/elevator_to_engine0</input>
+        <input>fcs/throttle_to_engine0</input>
+        <output>fcs/throttle-pos-norm</output>
+      </summer>
+    </channel>
+
+    <channel name="Engine4_Yaw">
+      <pure_gain name="fcs/rudder_to_engine4_yaw">
+        <input>fcs/rudder-cmd-norm</input>
+        <gain>fcs/engine-yaw-mix</gain>
+        <output>propulsion/engine/yaw-angle-rad</output>
+      </pure_gain>
+    </channel>
+
+    <channel name="Engine5_Roll">
+      <pure_gain name="fcs/rudder_to_engine4_roll">
+        <input>fcs/aileron-cmd-norm</input>
+        <gain>fcs/engine-roll-mix</gain>
+        <output>propulsion/engine/roll-angle-rad</output>
+      </pure_gain>
+    </channel>
+      
+          <channel name="Engine5">
+      <pure_gain name="fcs/elevator_to_engine5">
+        <input>fcs/elevator-cmd-norm</input>
+        <gain>fcs/engine-pitch-mix</gain>
+      </pure_gain>
+      <pure_gain name="fcs/throttle_to_engine5">
+        <input>fcs/throttle-cmd-norm</input>
+        <gain>fcs/engine-thrust-mix</gain>
+      </pure_gain>
+      <summer>
+        <input>fcs/elevator_to_engine0</input>
+        <input>fcs/throttle_to_engine0</input>
+        <output>fcs/throttle-pos-norm</output>
+      </summer>
+    </channel>
+
+    <channel name="Engine5_Yaw">
+      <pure_gain name="fcs/rudder_to_engine5_yaw">
+        <input>fcs/rudder-cmd-norm</input>
+        <gain>fcs/engine-yaw-mix</gain>
+        <output>propulsion/engine/yaw-angle-rad</output>
+      </pure_gain>
+    </channel>
+
+    <channel name="Engine5_Roll">
+      <pure_gain name="fcs/rudder_to_engine5_roll">
+        <input>fcs/aileron-cmd-norm</input>
+        <gain>fcs/engine-roll-mix</gain>
+        <output>propulsion/engine/roll-angle-rad</output>
+      </pure_gain>
+    </channel>
+      
+          <channel name="Engine6">
+      <pure_gain name="fcs/elevator_to_engine6">
+        <input>fcs/elevator-cmd-norm</input>
+        <gain>fcs/engine-pitch-mix</gain>
+      </pure_gain>
+      <pure_gain name="fcs/throttle_to_engine6">
+        <input>fcs/throttle-cmd-norm</input>
+        <gain>fcs/engine-thrust-mix</gain>
+      </pure_gain>
+      <summer>
+        <input>fcs/elevator_to_engine0</input>
+        <input>fcs/throttle_to_engine0</input>
+        <output>fcs/throttle-pos-norm</output>
+      </summer>
+    </channel>
+
+    <channel name="Engine6_Yaw">
+      <pure_gain name="fcs/rudder_to_engine6_yaw">
+        <input>fcs/rudder-cmd-norm</input>
+        <gain>fcs/engine-yaw-mix</gain>
+        <output>propulsion/engine/yaw-angle-rad</output>
+      </pure_gain>
+    </channel>
+
+    <channel name="Engine6_Roll">
+      <pure_gain name="fcs/rudder_to_engine6_roll">
+        <input>fcs/aileron-cmd-norm</input>
+        <gain>fcs/engine-roll-mix</gain>
+        <output>propulsion/engine/roll-angle-rad</output>
+      </pure_gain>
+    </channel>
+      
+          <channel name="Engine7">
+      <pure_gain name="fcs/elevator_to_engine7">
+        <input>fcs/elevator-cmd-norm</input>
+        <gain>fcs/engine-pitch-mix</gain>
+      </pure_gain>
+      <pure_gain name="fcs/throttle_to_engine7">
+        <input>fcs/throttle-cmd-norm</input>
+        <gain>fcs/engine-thrust-mix</gain>
+      </pure_gain>
+      <summer>
+        <input>fcs/elevator_to_engine0</input>
+        <input>fcs/throttle_to_engine0</input>
+        <output>fcs/throttle-pos-norm</output>
+      </summer>
+    </channel>
+
+    <channel name="Engine7_Yaw">
+      <pure_gain name="fcs/rudder_to_engine7_yaw">
+        <input>fcs/rudder-cmd-norm</input>
+        <gain>fcs/engine-yaw-mix</gain>
+        <output>propulsion/engine/yaw-angle-rad</output>
+      </pure_gain>
+    </channel>
+
+    <channel name="Engine7_Roll">
+      <pure_gain name="fcs/rudder_to_engine7_roll">
+        <input>fcs/aileron-cmd-norm</input>
+        <gain>fcs/engine-roll-mix</gain>
+        <output>propulsion/engine/roll-angle-rad</output>
+      </pure_gain>
+    </channel>
+      
+    <channel name="Engine8">
+      <pure_gain name="fcs/elevator_to_engine8">
+        <input>fcs/elevator-cmd-norm</input>
+        <gain>fcs/engine-pitch-mix</gain>
+      </pure_gain>
+      <pure_gain name="fcs/throttle_to_engine8">
+        <input>fcs/throttle-cmd-norm</input>
+        <gain>fcs/engine-thrust-mix</gain>
+      </pure_gain>
+      <summer>
+        <input>fcs/elevator_to_engine0</input>
+        <input>fcs/throttle_to_engine0</input>
+        <output>fcs/throttle-pos-norm</output>
+      </summer>
+    </channel>
+
+    <channel name="Engine8_Yaw">
+      <pure_gain name="fcs/rudder_to_engine8_yaw">
+        <input>fcs/rudder-cmd-norm</input>
+        <gain>fcs/engine-yaw-mix</gain>
+        <output>propulsion/engine/yaw-angle-rad</output>
+      </pure_gain>
+    </channel>
+
+    <channel name="Engine8_Roll">
+      <pure_gain name="fcs/rudder_to_engine8_roll">
+        <input>fcs/aileron-cmd-norm</input>
+        <gain>fcs/engine-roll-mix</gain>
+        <output>propulsion/engine/roll-angle-rad</output>
+      </pure_gain>
+    </channel>
+    
   </flight_control>
 
   <propulsion>
