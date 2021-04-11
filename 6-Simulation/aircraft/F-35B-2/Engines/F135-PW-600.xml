@@ -16,7 +16,7 @@
     <maxthrust> 6137.3 </maxthrust>
   <bypassratio>     6 </bypassratio>
   <tsfc>            0.636 </tsfc>
-  <atsfc>           0.636
+  <atsfc>           0.636 </atsfc>
   <bleed>           0.03 </bleed>
   <idlen1>         30.0 </idlen1>
   <idlen2>         60.0 </idlen2>
