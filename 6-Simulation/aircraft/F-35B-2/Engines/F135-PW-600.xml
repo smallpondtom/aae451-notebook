@@ -12,8 +12,8 @@
 -->
 
 <turbine_engine name="F135-PW-600">
-  <milthrust> 2557.2 </milthrust>
-    <maxthrust> 3068.64 </maxthrust>
+  <milthrust> 5114.4 </milthrust>
+    <maxthrust> 6137.3 </maxthrust>
   <bypassratio>     6 </bypassratio>
   <tsfc>            0.636 </tsfc>
   <atsfc>           0.636
