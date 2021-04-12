@@ -129,7 +129,7 @@
             <tableData>
                 0   0.1
                 100  0.075
-                200 0
+                170 0
                 300 0
             </tableData>
         </table>
@@ -141,7 +141,7 @@
             <tableData>
                 0   0.1
                 100  0.075
-                200 0
+                170 0
                 300 0
             </tableData>
         </table>
@@ -153,7 +153,7 @@
             <tableData>
                 0   0
                 100  0
-                200 1
+                170 1
                 300 1
             </tableData>
         </table>
@@ -165,7 +165,7 @@
             <tableData>
                 0   0.1
                 100  0.1
-                200 0
+                170 0
                 300 0
             </tableData>
         </table>
@@ -189,7 +189,7 @@
             <tableData>
                 0   0.8
                 100  0.85
-                200 1.0
+                170 1.0
                 300 1.0
             </tableData>
         </table>
