@@ -57,8 +57,8 @@
       <static_friction>  0.80 </static_friction><!-- Updated to L410 values-->
       <dynamic_friction> 0.50 </dynamic_friction>
       <rolling_friction> 0.02 </rolling_friction>
-      <spring_coeff unit="LBS/FT">       19756.8000 </spring_coeff>
-      <damping_coeff unit="LBS/FT/SEC">  1411.2000 </damping_coeff>
+      <spring_coeff unit="LBS/FT">       21933.00 </spring_coeff>
+      <damping_coeff unit="LBS/FT/SEC">  1622.0 </damping_coeff>
       <max_steer unit="DEG"> 45.00 </max_steer>
       <brake_group>NONE</brake_group>
       <retractable>1</retractable>
@@ -72,8 +72,8 @@
       <static_friction>  0.80 </static_friction>
       <dynamic_friction> 0.50 </dynamic_friction>
       <rolling_friction> 0.02 </rolling_friction>
-      <spring_coeff unit="LBS/FT">      70560.0000 </spring_coeff>
-      <damping_coeff unit="LBS/FT/SEC"> 2822.4000 </damping_coeff>
+      <spring_coeff unit="LBS/FT">      78116.0 </spring_coeff>
+      <damping_coeff unit="LBS/FT/SEC"> 3194.0 </damping_coeff>
       <max_steer unit="DEG">0</max_steer>
       <brake_group>LEFT</brake_group>
       <retractable>1</retractable>
@@ -87,8 +87,8 @@
       <static_friction>  0.80 </static_friction>
       <dynamic_friction> 0.50 </dynamic_friction>
       <rolling_friction> 0.02 </rolling_friction>
-      <spring_coeff unit="LBS/FT">      70560.0000 </spring_coeff>
-      <damping_coeff unit="LBS/FT/SEC"> 2822.4000 </damping_coeff>
+      <spring_coeff unit="LBS/FT">      78116.0 </spring_coeff>
+      <damping_coeff unit="LBS/FT/SEC"> 3194.0 </damping_coeff>
       <max_steer unit="DEG">0</max_steer>
       <brake_group>RIGHT</brake_group>
       <retractable>1</retractable>
@@ -123,7 +123,7 @@
         <table>
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
-                0   0.075
+                0   0.1
                 100  0.075
                 200 0
                 300 0
@@ -135,7 +135,7 @@
         <table>
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
-                0   0.075
+                0   0.1
                 100  0.075
                 200 0
                 300 0
@@ -183,7 +183,7 @@
         <table>
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
-                0   0.85
+                0   0.8
                 100  0.85
                 200 1.0
                 300 1.0
@@ -249,7 +249,7 @@
         <input>fcs/elevator_to_engine0</input>
         <input>fcs/throttle_to_engine0</input>
         <input>fcs/aileron_to_engine0</input>
-        <output>fcs/throttle-pos-norm[0]</output>
+        <output>fcs/throttle-pos-norm</output>
       </summer>
     </channel>
 
@@ -557,37 +557,37 @@
           <table>
             <independentVar lookup="row">aero/alpha-rad</independentVar>
             <tableData>
-            -0.2618 0.0146
-            -0.2443 0.0140
-            -0.2269 0.0134
-            -0.2094 0.0128
-            -0.1920 0.0123
-            -0.1745 0.0119
-            -0.1571 0.0115
-            -0.1396 0.0112
-            -0.1222 0.0109
-            -0.1047 0.0107
-            -0.0873 0.0105
-            -0.0698 0.0103
-            -0.0524 0.0102
-            -0.0349 0.0100
-            -0.0175 0.0100
-            0.0000 0.0099
-            0.0175 0.0098
-            0.0349 0.0097
-            0.0524 0.0097
-            0.0698 0.0097
-            0.0873 0.0097
-            0.1047 0.0096
-            0.1222 0.0095
-            0.1396 0.0096
-            0.1571 0.0100
-            0.1745 0.0105
-            0.1920 0.0112
-            0.2094 0.0121
-            0.2269 0.0131
-            0.2443 0.0143
-            0.2618 0.0158
+                -0.261799388	0.031450687
+                -0.244346095	0.030821047
+                -0.226892803	0.030235077
+                -0.20943951	    0.029623057
+                -0.191986218	0.029136357
+                -0.174532925	0.028727587
+                -0.157079633	0.028323977
+                -0.13962634	   0.028025007
+                -0.122173048	0.027737677
+                -0.104719755	0.027505237
+                -0.087266463	0.027307887
+                -0.06981317	    0.027145337
+                -0.052359878	0.027009867
+                -0.034906585	0.026894527
+                -0.017453293	0.02680149
+                           0    0.026719
+                 0.017453293    0.026652396
+                 0.034906585    0.026597178
+                 0.052359878    0.026582972
+                 0.06981317     0.026564498
+                 0.087266463    0.026531973
+                 0.104719755    0.026464112
+                 0.122173048    0.026362883
+                 0.13962634     0.026492962
+                 0.157079633    0.026836858
+                 0.174532925    0.027380537
+                 0.191986218    0.028107107
+                 0.20943951     0.028970127
+                 0.226892803    0.029997867
+                 0.244346095    0.031202607
+                 0.261799388    0.032642977
             </tableData>
           </table>
         </product>
