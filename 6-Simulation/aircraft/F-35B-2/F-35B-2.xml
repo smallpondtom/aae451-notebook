@@ -20,20 +20,20 @@
     <htailarm unit="FT">   22.2 </htailarm>
     <vtailarea unit="FT2">   53.28 </vtailarea>
     <vtailarm unit="FT">   16.88 </vtailarm>
-    <location name="AERORP" unit="IN"><!-- Wing Neutral point from XFLR5 -->
-      <x> 346.45 </x>
+    <location name="AERORP" unit="FT"><!-- Wing Neutral point from XFLR5 -->
+      <x> 28.87 </x>
       <y>   0.00 </y>
-      <z>   59.00 </z>
+      <z>   4.92 </z>
     </location>
-    <location name="EYEPOINT" unit="IN"><!-- Unchanged. Pilot's head location. deemed unimportant to current work -->
-      <x> 122.84 </x>
+    <location name="EYEPOINT" unit="FT"><!-- Unchanged. Pilot's head location. deemed unimportant to current work -->
+      <x> 10.24 </x>
       <y>   0.00 </y>
-      <z>  36.00 </z>
+      <z>  3.00 </z>
     </location>
-    <location name="VRP" unit="IN"><!-- Vehicle Reference Point. matches model location to flight model location (?) unchanged-->
+    <location name="VRP" unit="FT"><!-- Vehicle Reference Point. matches model location to flight model location (?) unchanged-->
       <x>0</x>
       <y>0</y>
-      <z>20</z>
+      <z>1.67</z>
     </location>
   </metrics>
   <mass_balance>
@@ -41,74 +41,78 @@
     <iyy unit="SLUG*FT2">     24324 </iyy><!-- From XFLR5 -->
     <izz unit="SLUG*FT2">     38124 </izz><!-- From XFLR5 -->
     <emptywt unit="LBS">     9039 </emptywt><!-- Weight/Balance Sheet -->
-    <location name="CG" unit="IN">
-      <x> 275.16 </x><!-- From Weight/Balance sheet-->
+    <location name="CG" unit="FT">
+      <x> 22.93 </x><!-- From Weight/Balance sheet-->
       <y>   0.00 </y><!-- From Weight/Balance sheet-->
-      <z> 27.6 </z><!-- From Weight/Balance sheet-->
+      <z> 2.30 </z><!-- From Weight/Balance sheet-->
     </location>
   </mass_balance>
   <ground_reactions>
     <contact type="BOGEY" name="NOSE">
-      <location unit="IN"><!-- Nose Gear location from Jacob's Structures work-->
-        <x>  86.6 </x>
+      <location unit="FT"><!-- Nose Gear location from Jacob's Structures work-->
+        <x>  7.22 </x>
         <y>   0.00 </y>
-        <z> -23.6 </z>
+        <z> -1.97 </z>
       </location>
       <static_friction>  0.80 </static_friction><!-- Updated to L410 values-->
       <dynamic_friction> 0.50 </dynamic_friction>
       <rolling_friction> 0.02 </rolling_friction>
-      <spring_coeff unit="LBS/FT">       21933.00 </spring_coeff>
-      <damping_coeff unit="LBS/FT/SEC">  1622.0 </damping_coeff>
+      <spring_coeff unit="LBS/FT">       2500.00 </spring_coeff>
+      <damping_coeff unit="LBS/FT/SEC">  500.0 </damping_coeff>
       <max_steer unit="DEG"> 45.00 </max_steer>
       <brake_group>NONE</brake_group>
       <retractable>1</retractable>
     </contact>
     <contact type="BOGEY" name="LEFT_MAIN"><!-- Same to as nose landing gear-->
-      <location unit="IN">
-        <x> 346.5 </x>
-        <y> -71.5 </y>
-        <z> -23.6 </z>
+      <location unit="FT">
+        <x> 25.08 </x>
+        <y> -3.92 </y>
+        <z> -1.97 </z>
       </location>
       <static_friction>  0.80 </static_friction>
       <dynamic_friction> 0.50 </dynamic_friction>
       <rolling_friction> 0.02 </rolling_friction>
-      <spring_coeff unit="LBS/FT">      78116.0 </spring_coeff>
-      <damping_coeff unit="LBS/FT/SEC"> 3194.0 </damping_coeff>
+      <spring_coeff unit="LBS/FT">      7000.0 </spring_coeff>
+      <damping_coeff unit="LBS/FT/SEC"> 1500.0 </damping_coeff>
       <max_steer unit="DEG">0</max_steer>
       <brake_group>LEFT</brake_group>
       <retractable>1</retractable>
     </contact>
     <contact type="BOGEY" name="RIGHT_MAIN"><!-- Same to as nose landing gear-->
-      <location unit="IN">
-        <x> 346.5 </x>
-        <y>  71.5 </y>
-        <z> -23.6 </z>
+      <location unit="FT">
+        <x> 25.08 </x>
+        <y>  3.92 </y>
+        <z> -1.97 </z>
       </location>
       <static_friction>  0.80 </static_friction>
       <dynamic_friction> 0.50 </dynamic_friction>
       <rolling_friction> 0.02 </rolling_friction>
-      <spring_coeff unit="LBS/FT">      78116.0 </spring_coeff>
-      <damping_coeff unit="LBS/FT/SEC"> 3194.0 </damping_coeff>
+      <spring_coeff unit="LBS/FT">      7000.0 </spring_coeff>
+      <damping_coeff unit="LBS/FT/SEC"> 1500.0 </damping_coeff>
       <max_steer unit="DEG">0</max_steer>
       <brake_group>RIGHT</brake_group>
       <retractable>1</retractable>
     </contact>
-    <contact type="STRUCTURE" name="LEFT_WING"><!-- most likely site of a wing/ground incidence during taxi. from CAD-->
-      <location unit="IN">
-        <x> 278.07 </x>
-        <y> -274.015 </y>
-        <z> 56.259 </z>
+      
+    <!-- most likely site of a wing/ground incidence during taxi. from CAD-->
+    <contact type="STRUCTURE" name="LEFT_WING">
+      <location unit="FT">
+        <x> 23.17 </x>
+        <y> -22.83 </y>
+        <z> 4.69 </z>
       </location>
       <static_friction>  0.80 </static_friction>
       <dynamic_friction> 0.50 </dynamic_friction>
       <spring_coeff unit="LBS/FT">      59535.00 </spring_coeff>
       <damping_coeff unit="LBS/FT/SEC"> 11907.00 </damping_coeff>
     </contact>
-    <contact type="STRUCTURE" name="RIGHT_WING"><!-- Same as left wing-->
-      <location unit="IN">
-        <x> 278.07 </x>
-        <y>  274.015 </y>
-        <z> 56.259 </z>
+      
+    <!-- Same as left wing-->
+    <contact type="STRUCTURE" name="RIGHT_WING">
+      <location unit="FT">
+        <x> 23.17 </x>
+        <y>  22.83 </y>
+        <z> 4.69 </z>
       </location>
       <static_friction>  0.80 </static_friction>
       <dynamic_friction> 0.50 </dynamic_friction>
@@ -243,7 +247,7 @@
       </pure_gain>
       <pure_gain name="fcs/aileron_to_engine0">
           <input>fcs/aileron-cmd-norm</input>  
-          <gain>fcs/engine-roll-mix</gain>
+          <gain>-fcs/engine-roll-mix</gain>
       </pure_gain>
       <summer>
         <input>fcs/elevator_to_engine0</input>
@@ -256,7 +260,7 @@
     <channel name="Engine1">
       <pure_gain name="fcs/elevator_to_engine1">
         <input>fcs/elevator-cmd-norm</input>
-        <gain>fcs/engine-pitch-mix</gain>
+        <gain>-fcs/engine-pitch-mix</gain>
       </pure_gain>
       <pure_gain name="fcs/throttle_to_engine1">
         <input>fcs/throttle-cmd-norm</input>
@@ -264,7 +268,7 @@
       </pure_gain>
       <pure_gain name="fcs/aileron_to_engine1">
           <input>fcs/aileron-cmd-norm</input>  
-          <gain>fcs/engine-roll-mix</gain>
+          <gain>-fcs/engine-roll-mix</gain>
       </pure_gain>
       <summer>
         <input>fcs/elevator_to_engine1</input>
@@ -297,7 +301,7 @@
     
     <channel name="Engine3">
       <pure_gain name="fcs/elevator_to_engine3">
-        <input>fcs/elevator-cmd-norm</input>
+        <input>-fcs/elevator-cmd-norm</input>
         <gain>fcs/engine-pitch-mix</gain>
       </pure_gain>
       <pure_gain name="fcs/throttle_to_engine3">
@@ -319,127 +323,68 @@
   </flight_control>
 
   <propulsion>
-    <engine file="F135-PW-600"> <!-- Engines placed from Weight/Balance Sheet. each "engine" is a nozzle-->
+    <engine file="F135-PW-600"> <!-- Right engine cold post -->
       <location unit="FT">
         <x>  17.5 </x>
-        <y>   11.48 </y>
+        <y>   9.02 </y>
         <z>   0.254 </z>
       </location>
       <feed>0</feed>
-      <thruster file="direct">
+      <thruster file="direct"> 
         <location unit="FT">
           <x>  17.5 </x>
-          <y>   11.48 </y>
+          <y>   9.02 </y>
           <z>   0.254 </z>
         </location>
       </thruster>
     </engine>
-    <engine file="F135-PW-600">
+    <engine file="F135-PW-600"> <!-- Right engine hot post -->
       <location unit="FT">
         <x>  30.66 </x>
-        <y>   11.48 </y>
+        <y>   9.02 </y>
         <z>   0.254 </z>
       </location>
       <feed>0</feed>
       <thruster file="direct">
         <location unit="FT">
           <x>  30.66 </x>
-          <y>   11.48 </y>
+          <y>   9.02 </y>
           <z>   0.254 </z>
         </location>
       </thruster>
     </engine>
-    <engine file="F135-PW-600">
+    <engine file="F135-PW-600"> <!-- Left engine cold post -->
       <location unit="FT">
         <x>  17.5 </x>
-        <y>   6.56 </y>
+        <y>   -9.02 </y>
         <z>   0.254 </z>
       </location>
       <feed>0</feed>
       <thruster file="direct">
         <location unit="FT">
           <x>  17.5 </x>
-          <y>   6.56 </y>
+          <y>   -9.02 </y>
           <z>   0.254 </z>
         </location>
       </thruster>
     </engine>
-        <engine file="F135-PW-600">
+    <engine file="F135-PW-600"> <!--Left engine hot post -->
       <location unit="FT">
         <x>  30.66 </x>
-        <y>   6.56 </y>
+        <y>   -9.02 </y>
         <z>   0.254 </z>
       </location>
       <feed>0</feed>
       <thruster file="direct">
         <location unit="FT">
           <x>  30.66 </x>
-          <y>   6.56 </y>
+          <y>   -9.02 </y>
           <z>   0.254 </z>
         </location>
       </thruster>
     </engine>
       
-    <engine file="F135-PW-600">
-      <location unit="FT">
-        <x>  17.5 </x>
-        <y>   -11.48 </y>
-        <z>   0.254 </z>
-      </location>
-      <feed>0</feed>
-      <thruster file="direct">
-        <location unit="FT">
-          <x>  17.5 </x>
-          <y>   -11.48 </y>
-          <z>   0.254 </z>
-        </location>
-      </thruster>
-    </engine>
-    <engine file="F135-PW-600">
-      <location unit="FT">
-        <x>  30.66 </x>
-        <y>   -11.48 </y>
-        <z>   0.254 </z>
-      </location>
-      <feed>0</feed>
-      <thruster file="direct">
-        <location unit="FT">
-          <x>  30.66 </x>
-          <y>   -11.48 </y>
-          <z>   0.254 </z>
-        </location>
-      </thruster>
-    </engine>
-    <engine file="F135-PW-600">
-      <location unit="FT">
-        <x>  17.5 </x>
-        <y>   -6.56 </y>
-        <z>   0.254 </z>
-      </location>
-      <feed>0</feed>
-      <thruster file="direct">
-        <location unit="FT">
-          <x>  17.5 </x>
-          <y>   -6.56 </y>
-          <z>   0.254 </z>
-        </location>
-      </thruster>
-    </engine>
-        <engine file="F135-PW-600">
-      <location unit="FT">
-        <x>  30.66 </x>
-        <y>   -6.56 </y>
-        <z>   0.254 </z>
-      </location>
-      <feed>0</feed>
-      <thruster file="direct">
-        <location unit="FT">
-          <x>  30.66 </x>
-          <y>   -6.56 </y>
-          <z>   0.254 </z>
-        </location>
-      </thruster>
-    </engine>
+    
 
     <!-- Tank number 0 --> <!-- NEEDS UPDATED-->
     <tank type="FUEL">
