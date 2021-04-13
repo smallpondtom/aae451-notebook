@@ -1,0 +1,168 @@
+{
+    "groundTrim": {
+        "res": {
+            "fun": 9.04258552713375e-12,
+            "nit": 81,
+            "nfev": 182,
+            "status": 0,
+            "success": true,
+            "x": [
+                0.007495814706432985,
+                3.112150772283938
+            ],
+            "final_simplex": [
+                [
+                    [
+                        0.007495814706432985,
+                        3.112150772283938
+                    ],
+                    [
+                        0.007495814705686754,
+                        3.1121507722845134
+                    ],
+                    [
+                        0.007495814706054424,
+                        3.112150772284031
+                    ]
+                ],
+                [
+                    9.04258552713375e-12,
+                    9.053370488788511e-12,
+                    9.05337075034692e-12
+                ]
+            ]
+        },
+        "op_ground": {
+            "ic/vt-fps": 0,
+            "gear/gear-cmd-norm": 1,
+            "propulsion/engine/pitch-angle-rad": 0.0,
+            "fcs/throttle-cmd-norm": 0,
+            "fcs/aileron-cmd-norm": 0,
+            "fcs/elevator-cmd-norm": 0,
+            "fcs/rudder-cmd-norm": 0,
+            "fcs/left-brake-cmd-norm": 1,
+            "fcs/right-brake-cmd-norm": 1,
+            "fcs/center-brake-cmd-norm": 1,
+            "ic/theta-rad": 0.007495814706432985,
+            "ic/h-agl-ft": 3.112150772283938
+        },
+        "fbz_initial": {
+            "forces/fbz-aero-lbs": -0.0,
+            "forces/fbz-weight-lbs": 11358.887299201851,
+            "forces/fbz-total-lbs": -4999.207773218508,
+            "forces/fbz-gear-lbs": -4999.207773218508,
+            "forces/fbz-prop-lbs": 0.0
+        },
+        "fbz_final": {
+            "forces/fbz-aero-lbs": -0.0,
+            "forces/fbz-weight-lbs": 11358.593849189343,
+            "forces/fbz-total-lbs": -11335.795515755297,
+            "forces/fbz-gear-lbs": -11335.795515755297,
+            "forces/fbz-prop-lbs": 0.0
+        }
+    },
+    "hoverTrim": {
+        "res": {
+            "fun": 8.855948537345098e-12,
+            "jac": [
+                -5.457940336657863e-06,
+                -3.7477187228357755e-07,
+                -2.785377607528066e-07,
+                -3.950653361904452e-07,
+                -2.51641946995969e-07,
+                -3.7615136221815456e-07
+            ],
+            "nfev": 259,
+            "njev": 37,
+            "nit": 16,
+            "status": 0,
+            "x": [
+                0.9287405445871773,
+                0.7168374772549062,
+                1.5717965316467137,
+                1.5693724982882014,
+                1.5717965408049575,
+                1.5693725005375176
+            ],
+            "success": true
+        },
+        "op_hover": {
+            "ic/h-agl-ft": 10,
+            "ic/vd-fps": 0,
+            "ic/vn-fps": 0.0,
+            "ic/ve-fps": -0.0,
+            "ic/theta-rad": 0,
+            "gear/gear-cmd-norm": 1,
+            "fcs/left-brake-cmd-norm": 0,
+            "fcs/right-brake-cmd-norm": 0,
+            "fcs/center-brake-cmd-norm": 0,
+            "fcs/throttle-cmd-norm": 0.9287405445871773,
+            "fcs/elevator-cmd-norm": 0.7168374772549062,
+            "propulsion/engine/pitch-angle-rad": 1.5717965316467137,
+            "propulsion/engine[1]/pitch-angle-rad": 1.5693724982882014,
+            "propulsion/engine[2]/pitch-angle-rad": 1.5717965408049575,
+            "propulsion/engine[3]/pitch-angle-rad": 1.5693725005375176
+        },
+        "dot_values": {
+            "velocities/h-dot-fps": -0.0,
+            "velocities/phidot-rad_sec": 0.0,
+            "velocities/thetadot-rad_sec": 0.0,
+            "velocities/psidot-rad_sec": 0.0,
+            "accelerations/pdot-rad_sec2": 1.8657114455788187e-09,
+            "accelerations/qdot-rad_sec2": 1.0488849405364631e-07,
+            "accelerations/rdot-rad_sec2": -1.4073216019254512e-08,
+            "accelerations/udot-ft_sec2": -6.790932451788967e-09,
+            "accelerations/vdot-ft_sec2": 2.95195145366689e-06,
+            "accelerations/wdot-ft_sec2": 3.562588801742095e-07,
+            "aero/alphadot-rad_sec": 0.0,
+            "aero/betadot-rad_sec": 0.0,
+            "aero/alphadot-deg_sec": 0.0,
+            "aero/betadot-deg_sec": 0.0,
+            "aero/coefficient/Cmadot": -0.0
+        }
+    },
+    "cruiseTrim": {
+        "res": {
+            "fun": -0.07279137319063003,
+            "jac": [
+                0.10000006794852467,
+                9.115208592726535e-05,
+                -3.626821065676447e-05,
+                6.782352457438593e-05,
+                0.003340291931381797,
+                2.5981994333944528e-05,
+                0.005215859688600943
+            ],
+            "nfev": 760,
+            "njev": 95,
+            "nit": 69,
+            "status": 0,
+            "x": [
+                0.0,
+                -0.12367121178077818,
+                0.0006951847767905014,
+                -0.00020624021382990634,
+                0.02021777920968398,
+                0.0012922701882664349,
+                0.0
+            ],
+            "success": true
+        },
+        "op_cruise": {
+            "ic/gamma-rad": 0,
+            "ic/vt-fps": 677,
+            "ic/h-agl-ft": 38000.0,
+            "gear/gear-cmd-norm": 0,
+            "fcs/left-brake-cmd-norm": 0,
+            "fcs/right-brake-cmd-norm": 0,
+            "fcs/center-brake-cmd-norm": 0,
+            "propulsion/engine/pitch-angle-rad": 0.0,
+            "fcs/throttle-cmd-norm": 0.0,
+            "fcs/elevator-cmd-norm": -0.12367121178077818,
+            "fcs/rudder-cmd-norm": 0.0006951847767905014,
+            "fcs/aileron-cmd-norm": -0.00020624021382990634,
+            "ic/alpha-rad": 0.02021777920968398,
+            "ic/beta-rad": 0.0012922701882664349
+        }
+    }
+}

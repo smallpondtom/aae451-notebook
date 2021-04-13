@@ -88,7 +88,7 @@ def trim(aircraft, ic, design_vector, x0, verbose, cost=None, **kwargs):
     for i, var in enumerate(design_vector):
         ic[var] = res['x'][i]
     
-    return ic, fdm
+    return ic, fdm, res
 
 
 def simulate(aircraft, op_0, op_list=None, op_times=None, tf=50, realtime=False):
