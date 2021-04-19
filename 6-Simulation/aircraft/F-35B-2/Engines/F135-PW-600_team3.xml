@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<!--
+  File:     F135-PW-600.xml
+  Author:   Aero-Matic v 0.81
+
+  Inputs:
+    name:           F135-PW-600
+    type:           turbine
+    thrust:         10228.8 lb
+    augmented?      no
+    injected?       no
+-->
+
+<turbine_engine name="F135-PW-600">
+  <milthrust> 5114.4 </milthrust>
+    <maxthrust> 6137.3 </maxthrust>
+  <bypassratio>     6 </bypassratio>
+  <tsfc>            0.636 </tsfc>
+  <atsfc>           0.636 </atsfc>
+  <bleed>           0.03 </bleed>
+  <idlen1>         30.0 </idlen1>
+  <idlen2>         60.0 </idlen2>
+  <maxn1>         100.0 </maxn1>
+  <maxn2>         100.0 </maxn2>
+  <augmented>         1 </augmented>
+  <augmethod>         2 </augmethod>
+  <injected>          0 </injected>
+
+  <function name="IdleThrust">
+   <table>
+    <independentVar lookup="row">velocities/mach</independentVar>
+    <independentVar lookup="column">atmosphere/density-altitude</independentVar>
+    <tableData>
+         -10000     0     10000   20000   30000   40000   50000   60000
+     0.0  0.0430  0.0488  0.0528  0.0694  0.0899  0.1183  0.1467  0.0
+     0.2  0.0500  0.0501  0.0335  0.0544  0.0797  0.1049  0.1342  0.0
+     0.4  0.0040  0.0047  0.0020  0.0272  0.0595  0.0891  0.1203  0.0
+     0.6  0.0     0.0     0.0     0.0     0.0276  0.0718  0.1073  0.0
+     0.8  0.0     0.0     0.0     0.0     0.0474  0.0468  0.0900  0.0
+     1.0  0.0     0.0     0.0     0.0     0.0     0.0552  0.0800  0.0
+    </tableData>
+   </table>
+  </function>
+
+  <function name="MilThrust">
+   <table>
+    <independentVar lookup="row">velocities/mach</independentVar>
+    <independentVar lookup="column">atmosphere/density-altitude</independentVar>
+    <tableData>
+           -9843       0    9843   19686   29529   39372   45934 	80000
+     0.0   1.0000	1.0000	0.7617	0.6632	0.4888	0.3203	0.2301 	0
+     0.1   0.8483	0.8483	0.6572	0.5940	0.4441	0.2923	0.2097 	0
+     0.2   0.7201	0.7201	0.5700	0.5386	0.4094	0.2709	0.1941 	0
+     0.3   0.6103	0.6103	0.4966	0.4945	0.3832	0.2550	0.1826 	0
+     0.4   0.5149	0.5149	0.4341	0.4596	0.3645	0.2442	0.1747 	0
+     0.5   0.4293	0.4293	0.3793	0.4311	0.3521	0.2377	0.1700 	0
+     0.6   0.3481	0.3481	0.3286	0.4049	0.3447	0.2348	0.1679 	0
+     0.7   0.2661	0.2661	0.2784	0.3714	0.3412	0.2348	0.1679 	0
+     0.8   0.1776	0.1776	0.2246	0.2959	0.3402	0.2370	0.1696 	0
+     0.9   0.0757	0.0757	0.1627	0.2491	0.3402	0.2408	0.1723 	0
+    </tableData>
+   </table>
+  </function>
+      
+  <function name="AugThrust">
+   <table>
+    <independentVar lookup="row">velocities/mach</independentVar>
+    <independentVar lookup="column">atmosphere/density-altitude</independentVar>
+    <tableData>
+           -9843       0    9843   19686   29529   39372   45934 	80000
+     0.0   1.0000	1.0000	0.7617	0.6632	0.4888	0.3203	0.2301 	0
+     0.1   0.8483	0.8483	0.6572	0.5940	0.4441	0.2923	0.2097 	0
+     0.2   0.7201	0.7201	0.5700	0.5386	0.4094	0.2709	0.1941 	0
+     0.3   0.6103	0.6103	0.4966	0.4945	0.3832	0.2550	0.1826 	0
+     0.4   0.5149	0.5149	0.4341	0.4596	0.3645	0.2442	0.1747 	0
+     0.5   0.4293	0.4293	0.3793	0.4311	0.3521	0.2377	0.1700 	0
+     0.6   0.3481	0.3481	0.3286	0.4049	0.3447	0.2348	0.1679 	0
+     0.7   0.2661	0.2661	0.2784	0.3714	0.3412	0.2348	0.1679 	0
+     0.8   0.1776	0.1776	0.2246	0.2959	0.3402	0.2370	0.1696 	0
+     0.9   0.0757	0.0757	0.1627	0.2491	0.3402	0.2408	0.1723 	0
+    </tableData>
+   </table>
+  </function>
+
+</turbine_engine>
