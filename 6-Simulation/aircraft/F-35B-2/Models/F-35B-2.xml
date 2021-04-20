@@ -8,7 +8,7 @@
 	
 	<model>
 		<usage>interior</usage>
-		<path>Aircraft/F-35B/Models/Cockpit.xml</path>
+		<path>Aircraft/F-35B-2/Models/Cockpit.xml</path>
 	</model>
 	
 	<!-- Rembrandt -->
@@ -45,24 +45,24 @@
 	<!-- Lights -->
 	
 	<model>
-		<path>Aircraft/F-35B/Models/Lights.xml</path>
+		<path>Aircraft/F-35B-2/Models/Lights.xml</path>
 	</model>
 	
 	<!-- Effects -->
 	<model>
-		<path>Aircraft/F-35B/Models/Effects.xml</path>
+		<path>Aircraft/F-35B-2/Models/Effects.xml</path>
 	</model>
 	
 	<!-- MP sound call -->
 	
 	<sound>
-		<path>Aircraft/F-35B/Sounds/MP-Sound.xml</path>
+		<path>Aircraft/F-35B-2/Sounds/MP-Sound.xml</path>
 	</sound>
 
 	<!-- Submodels -->
 	
 	<model>
-		<path>Aircraft/F-35B/Models/Engine.xml</path>
+		<path>Aircraft/F-35B-2/Models/Engine.xml</path>
 		<offsets>
 			<x-m>0</x-m>
 			<y-m>0</y-m>
@@ -71,7 +71,7 @@
 	</model>
 	
 	<model>
-		<path>Aircraft/F-35B/Models/Gear.xml</path>
+		<path>Aircraft/F-35B-2/Models/Gear.xml</path>
 		<offsets>
 			<x-m>0</x-m>
 			<y-m>0</y-m>
@@ -80,7 +80,7 @@
 	</model>
 	
 	<model>
-		<path>Aircraft/F-35B/Models/Payload.xml</path>
+		<path>Aircraft/F-35B-2/Models/Payload.xml</path>
 		<offsets>
 			<x-m>0</x-m>
 			<y-m>0</y-m>
@@ -103,7 +103,7 @@
 
 	<nasal>
 		<load>
-			var livery_update = aircraft.livery_update.new("Aircraft/F-35B/Models/Liveries");
+			var livery_update = aircraft.livery_update.new("Aircraft/F-35B-2/Models/Liveries");
 		</load>
 		<unload>
 			livery_update.stop();
@@ -153,7 +153,7 @@
 	<animation>
 		<type>shader</type>
 		<shader>chrome</shader>
-		<texture>Aircraft/F-35B/Models/Glass.png</texture>
+		<texture>Aircraft/F-35B-2/Models/Glass.png</texture>
 		<object-name>eots</object-name>
 		<object-name>canopy</object-name>
 		<object-name>plume</object-name>
@@ -553,10 +553,10 @@
 		<object-name>fan</object-name>
 		<condition>
 			<not>
-				<greater-than>
-					<property>controls/engines/engine/mixture</property>
-					<value>0.99</value>
-				</greater-than>
+				<less-than>
+    				<property>/surface-positions/spoilers-pos-norm</property>
+					<value>0.77</value>
+				</less-than>
 			</not>
 		</condition>
 	</animation>
@@ -565,7 +565,7 @@
 	<animation>
 		<type>spin</type>
 		<object-name>fan</object-name>
-		<property>engines/engine[0]/n2</property>
+		<property>engines/engine[1]/running</property>
 		<factor>20</factor>
 		<center>
 			<x-m>-2.9674</x-m>
@@ -584,19 +584,15 @@
 	<animation>
 		<type>rotate</type>
 		<object-name>door fan</object-name>
-		<property>controls/engines/engine/mixture</property>
+    	<property>/surface-positions/spoilers-pos-norm</property>
 		<interpolation>
 			<entry>
-				<ind>0.0</ind>
-				<dep>80</dep>
-			</entry>
-			<entry>
 				<ind>0.5</ind>
-				<dep>80</dep>
+				<dep>0</dep>
 			</entry>
 			<entry>
-				<ind>1.0</ind>
-				<dep>0</dep>
+				<ind>0.51</ind>
+				<dep>80</dep>
 			</entry>
 		</interpolation>
 		<axis>
@@ -612,19 +608,15 @@
 	<animation>
 		<type>rotate</type>
 		<object-name>door fanL</object-name>
-		<property>controls/engines/engine/mixture</property>
+    	<property>/surface-positions/spoilers-pos-norm</property>
 		<interpolation>
 			<entry>
-				<ind>0.0</ind>
-				<dep>-100</dep>
-			</entry>
-			<entry>
 				<ind>0.5</ind>
-				<dep>-100</dep>
+				<dep>0</dep>
 			</entry>
 			<entry>
-				<ind>1.0</ind>
-				<dep>0</dep>
+				<ind>0.51</ind>
+				<dep>-100</dep>
 			</entry>
 		</interpolation>
 		<axis>
@@ -640,19 +632,15 @@
 	<animation>
 		<type>rotate</type>
 		<object-name>door fanR</object-name>
-		<property>controls/engines/engine/mixture</property>
+    	<property>/surface-positions/spoilers-pos-norm</property>
 		<interpolation>
 			<entry>
-				<ind>0.0</ind>
-				<dep>100</dep>
-			</entry>
-			<entry>
 				<ind>0.5</ind>
-				<dep>100</dep>
+				<dep>0</dep>
 			</entry>
 			<entry>
-				<ind>1.0</ind>
-				<dep>0</dep>
+				<ind>0.51</ind>
+				<dep>-100</dep>
 			</entry>
 		</interpolation>
 		<axis>
@@ -668,19 +656,15 @@
 	<animation>
 		<type>rotate</type>
 		<object-name>door topL</object-name>
-		<property>controls/engines/engine/mixture</property>
+    	<property>/surface-positions/spoilers-pos-norm</property>
 		<interpolation>
 			<entry>
-				<ind>0.0</ind>
-				<dep>95</dep>
-			</entry>
-			<entry>
 				<ind>0.5</ind>
-				<dep>95</dep>
+				<dep>0</dep>
 			</entry>
 			<entry>
-				<ind>1.0</ind>
-				<dep>0</dep>
+				<ind>0.51</ind>
+				<dep>95</dep>
 			</entry>
 		</interpolation>
 		<axis>
@@ -696,19 +680,15 @@
 	<animation>
 		<type>rotate</type>
 		<object-name>door topR</object-name>
-		<property>controls/engines/engine/mixture</property>
+    	<property>/surface-positions/spoilers-pos-norm</property>
 		<interpolation>
 			<entry>
-				<ind>0.0</ind>
-				<dep>-95</dep>
-			</entry>
-			<entry>
 				<ind>0.5</ind>
-				<dep>-95</dep>
+				<dep>0</dep>
 			</entry>
 			<entry>
-				<ind>1.0</ind>
-				<dep>0</dep>
+				<ind>0.51</ind>
+				<dep>-95</dep>
 			</entry>
 		</interpolation>
 		<axis>
@@ -840,19 +820,15 @@
 	<animation>
 		<type>rotate</type>
 		<object-name>door engineL</object-name>
-		<property>controls/engines/engine/mixture</property>
+    	<property>/surface-positions/spoilers-pos-norm</property>
 		<interpolation>
 			<entry>
-				<ind>0.0</ind>
-				<dep>-90</dep>
-			</entry>
-			<entry>
 				<ind>0.5</ind>
-				<dep>-90</dep>
+				<dep>0</dep>
 			</entry>
 			<entry>
-				<ind>1.0</ind>
-				<dep>0</dep>
+				<ind>0.51</ind>
+				<dep>80</dep>
 			</entry>
 		</interpolation>
 		<axis>
@@ -868,19 +844,15 @@
 	<animation>
 		<type>rotate</type>
 		<object-name>door engineR</object-name>
-		<property>controls/engines/engine/mixture</property>
+    	<property>/surface-positions/spoilers-pos-norm</property>
 		<interpolation>
 			<entry>
-				<ind>0.0</ind>
-				<dep>90</dep>
-			</entry>
-			<entry>
 				<ind>0.5</ind>
-				<dep>90</dep>
+				<dep>0</dep>
 			</entry>
 			<entry>
-				<ind>1.0</ind>
-				<dep>0</dep>
+				<ind>0.51</ind>
+				<dep>80</dep>
 			</entry>
 		</interpolation>
 		<axis>
@@ -898,19 +870,15 @@
 	<animation>
 		<type>rotate</type>
 		<object-name>thrusterL</object-name>
-		<property>controls/engines/engine/mixture</property>
+    	<property>/surface-positions/spoilers-pos-norm</property>
 		<interpolation>
 			<entry>
-				<ind>0.0</ind>
-				<dep>-95</dep>
-			</entry>
-			<entry>
 				<ind>0.5</ind>
-				<dep>-95</dep>
+				<dep>0</dep>
 			</entry>
 			<entry>
-				<ind>1.0</ind>
-				<dep>0</dep>
+				<ind>0.51</ind>
+				<dep>-95</dep>
 			</entry>
 		</interpolation>
 		<axis>
@@ -926,19 +894,15 @@
 	<animation>
 		<type>rotate</type>
 		<object-name>thrusterR</object-name>
-		<property>controls/engines/engine/mixture</property>
+    	<property>/surface-positions/spoilers-pos-norm</property>
 		<interpolation>
 			<entry>
-				<ind>0.0</ind>
-				<dep>95</dep>
-			</entry>
-			<entry>
 				<ind>0.5</ind>
-				<dep>95</dep>
+				<dep>0</dep>
 			</entry>
 			<entry>
-				<ind>1.0</ind>
-				<dep>0</dep>
+				<ind>0.51</ind>
+				<dep>95</dep>
 			</entry>
 		</interpolation>
 		<axis>
@@ -956,19 +920,15 @@
 		<object-name>fuel top</object-name>
 		<object-name>fuel intake</object-name>
 		<object-name>fuel lever</object-name>
-		<property>controls/engines/engine/mixture</property>
+    	<property>/surface-positions/spoilers-pos-norm</property>
 		<interpolation>
 			<entry>
-				<ind>0.0</ind>
-				<dep>-20</dep>
-			</entry>
-			<entry>
 				<ind>0.5</ind>
-				<dep>-20</dep>
+				<dep>0</dep>
 			</entry>
 			<entry>
-				<ind>1.0</ind>
-				<dep>0</dep>
+				<ind>0.51</ind>
+				<dep>-20</dep>
 			</entry>
 		</interpolation>
 		<axis>   
@@ -984,19 +944,15 @@
 	<animation>
 		<type>rotate</type>
 		<object-name>fuel intake</object-name>
-		<property>controls/engines/engine/mixture</property>
+    	<property>/surface-positions/spoilers-pos-norm</property>
 		<interpolation>
 			<entry>
-				<ind>0.0</ind>
-				<dep>15</dep>
-			</entry>
-			<entry>
 				<ind>0.5</ind>
-				<dep>15</dep>
+				<dep>0</dep>
 			</entry>
 			<entry>
-				<ind>1.0</ind>
-				<dep>0</dep>
+				<ind>0.51</ind>
+				<dep>15</dep>
 			</entry>
 		</interpolation>
 		<axis>   
