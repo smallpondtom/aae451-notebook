@@ -134,7 +134,7 @@
       
     
     <!-- rename the fcs to ap --> 
-    <function name="ap/engine-roll-mix"><!-- Mixing untouched NEEDS FIXED-->
+<!--     <function name="ap/engine-roll-mix">
         <table>
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
@@ -144,23 +144,87 @@
                 300 0
             </tableData>
         </table>
-    </function>
+    </function> -->
     
+    <function name="ap/engine-roll-mix">
+        <table>
+            <independentVar>velocities/vt-fps</independentVar>
+            <tableData>
+                0   0.1
+                100 0.05
+                200 0.05
+                250 0.01
+                300 0
+                400 0
+                500 0
+                600 0
+            </tableData>
+        </table>
+    </function>
+
+      
     <!-- rename the fcs to ap -->
+<!--     <function name="ap/engine-pitch-mix">
+        <table>
+            <independentVar>velocities/vt-fps</independentVar>
+            <tableData>
+                0   0.1
+                100  0.075
+                170 0
+                300 0
+            </tableData>
+        </table>
+    </function> -->
+      
     <function name="ap/engine-pitch-mix">
         <table>
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
                 0   0.1
-                100  0.075
-                170 0
+                100 0.05
+                200 0.15
+                250 0.1
                 300 0
+                400 0
+                500 0
+                600 0
             </tableData>
         </table>
     </function>
+      
+   <!-- ap -->
+<!--     <function name="ap/engine-thrust-mix">
+        <table>
+            <independentVar>velocities/vt-fps</independentVar>
+            <tableData>
+                0   0.8
+                100  0.85
+                170 1.0
+                300 1.0
+            </tableData>
+        </table>
+    </function> -->
+      
+    <function name="ap/engine-thrust-mix">
+        <table>
+            <independentVar>velocities/vt-fps</independentVar>
+            <tableData>
+                0   0.8
+                100 0.9
+                200 0.8
+                250 0.89
+                300 1
+                400 1
+                500 1
+                600 1
+            </tableData>
+        </table>
+    </function>
+      
+      
     
     <!-- rename the fcs to ap -->
-    <function name="ap/aero-moment-mix">
+<!--     <function name="ap/aero-moment-mix">
         <table>
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
@@ -170,8 +234,24 @@
                 300 1
             </tableData>
         </table>
-    </function>
+    </function> -->
     
+    <function name="ap/aero-moment-mix">
+        <table>
+            <independentVar>velocities/vt-fps</independentVar>
+            <tableData>
+                0   0.1
+                100 0.25
+                200 0.75
+                300 1
+                400 1
+                500 1
+                600 1
+            </tableData>
+        </table>
+    </function>
+      
+      
     <!-- Add this --> 
     <function name="ap/heading-error-to-phi-deg-cmd">
         <table>
@@ -184,7 +264,7 @@
     </function>  
     
     <!-- change fcs to ap -->
-    <function name="ap/engine-yaw-mix">
+<!--     <function name="ap/engine-yaw-mix">
         <table>
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
@@ -194,7 +274,18 @@
                 300 0
             </tableData>
         </table>
+    </function> -->
+      
+    
+    <function name="ap/engine-yaw-mix">
+        <table>
+            <independentVar>velocities/vt-fps</independentVar>
+            <tableData>
+                0   0
+            </tableData>
+        </table>
     </function>
+      
     
 <!--     <function name="ap/lift-fan-thrust-mix">
         <table>
@@ -208,18 +299,7 @@
         </table>
     </function> -->
     
-    <!-- ap -->
-    <function name="ap/engine-thrust-mix">
-        <table>
-            <independentVar>velocities/vt-fps</independentVar>
-            <tableData>
-                0   0.8
-                100  0.85
-                170 1.0
-                300 1.0
-            </tableData>
-        </table>
-    </function>
+ 
     
     <!-- Kp gain for roll !! still needs revision -->
     <function name="ap/kp-roll">
@@ -308,7 +388,16 @@
         <table>
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
-                150 0
+                0   0
+                10  2.2693378436793652e-05
+                50  9.463146684658394e-05
+                100 0.00044018824011450347
+                200 0.0002651388026723141
+                250 0.00018909603323235232
+                300 0.00013809665042932874
+                400 0.00010420066389424295
+                500 8.349359458236942e-05
+                600 6.959126654189497e-05
             </tableData>
         </table>
     </function>
@@ -318,12 +407,17 @@
         <table>
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
-                100 0.03
-                200 0.08
-                300 0.17
-                400 0.02
-                500 0.01
-                600 0.01
+                0   0
+                10  0.6710420656064066
+                50  0.9999999999999996
+                100 1.0
+                150 0.855137465923621
+                200 0.5943804743105567
+                250 0.414623175679483
+                300 0.21189696357742605
+                400 0.08551643606006519
+                500 0.017498925714241952
+                600 -0.013497897128785765
             </tableData>
         </table>
     </function>
@@ -334,6 +428,16 @@
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
                 0   0
+                10  5.06222364686447e-07
+                50  -0.0008565431940129579
+                100 0.001232625279854894
+                150 0.0017751956474354343
+                200 0.000895760944332427
+                250 0.0006202389477868508
+                300 0.0004607347618300342
+                400 0.0003504229051416255
+                500 0.00028196277769138337
+                600 0.00023516880789841807
             </tableData>
         </table>
     </function>
@@ -343,13 +447,17 @@
         <table>
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
-              0   0.864
-              100 0.836
-              200 0.698
-              300 0.554
-              400 0.428
-              500 0.449
-              600 0.478
+              0   0.95
+              10  0.9257660328032375
+              50  0.8893793793809612
+              100 0.8421432204783876
+              150 0.6977257471262603
+              200 0.406082907160462
+              250 0.09816984661235575
+              300 0.1813007358796449
+              400 0.33089755187552056
+              500 0.4527469433925268
+              600 0.5915598389286832
             </tableData>
         </table>
     </function>
@@ -360,18 +468,22 @@
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
                0  0
-              10  0.66
-              50  5.7
-              250 5.7
-              400 3.48
-              500 1.97
-              600 1.13
+              10  5.729577792218203
+              50  5.729577951308233
+              100 1.7103079143637894
+              150 5.729577951308107
+              200 5.729577951308233
+              250 4.470853711336951
+              300 2.0510664508240755
+              400 0.2752808924424831
+              500 -0.8373586120047419
+              600 -1.2816403205901106
             </tableData>
         </table>
     </function>
     
-    <!-- not sure what this is and if it is necessary -->
-    <function name="ap/thrust-angle-trim">
+    <!-- This is not used !! -->
+<!--     <function name="ap/thrust-angle-trim">
         <table>
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
@@ -384,7 +496,7 @@
               600 0.026207264942735602
             </tableData>
         </table>
-    </function>  
+    </function>   -->
     
       
       
