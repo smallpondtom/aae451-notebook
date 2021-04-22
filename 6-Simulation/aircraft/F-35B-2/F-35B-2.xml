@@ -701,91 +701,91 @@
     <!-- For the engine we need to change them a lot -->
     <!-- for example changing fcs to ap --> 
     <channel name="Engine0">
-      <pure_gain name="fcs/elevator_to_engine0">
-        <input>fcs/elevator-cmd-norm</input>
-        <gain>fcs/engine-pitch-mix</gain>
+      <pure_gain name="ap/elevator_to_engine0">
+        <input>ap/elevator-cmd-norm</input>
+        <gain>ap/engine-pitch-mix</gain>
       </pure_gain>
-      <pure_gain name="fcs/throttle_to_engine0">
-        <input>fcs/throttle-cmd-norm</input>
-        <gain>fcs/engine-thrust-mix</gain>
+      <pure_gain name="ap/throttle_to_engine0">
+        <input>ap/throttle-cmd-norm</input>
+        <gain>ap/engine-thrust-mix</gain>
       </pure_gain>
-      <pure_gain name="fcs/aileron_to_engine0">
-          <input>fcs/aileron-cmd-norm</input>  
-          <gain>-fcs/engine-roll-mix</gain>
+      <pure_gain name="ap/aileron_to_engine0">
+          <input>ap/aileron-cmd-norm</input>  
+          <gain>-ap/engine-roll-mix</gain>
       </pure_gain>
       <summer>
-        <input>fcs/elevator_to_engine0</input>
-        <input>fcs/throttle_to_engine0</input>
-        <input>fcs/aileron_to_engine0</input>
+        <input>ap/elevator_to_engine0</input>
+        <input>ap/throttle_to_engine0</input>
+        <input>ap/aileron_to_engine0</input>
         <output>fcs/throttle-pos-norm</output>
       </summer>
     </channel>
 
     <channel name="Engine1">
-      <pure_gain name="fcs/elevator_to_engine1">
-        <input>fcs/elevator-cmd-norm</input>
-        <gain>-fcs/engine-pitch-mix</gain>
+      <pure_gain name="ap/elevator_to_engine1">
+        <input>ap/elevator-cmd-norm</input>
+        <gain>-ap/engine-pitch-mix</gain>
       </pure_gain>
-      <pure_gain name="fcs/throttle_to_engine1">
-        <input>fcs/throttle-cmd-norm</input>
-        <gain>fcs/engine-thrust-mix</gain>
+      <pure_gain name="ap/throttle_to_engine1">
+        <input>ap/throttle-cmd-norm</input>
+        <gain>ap/engine-thrust-mix</gain>
       </pure_gain>
-      <pure_gain name="fcs/aileron_to_engine1">
-          <input>fcs/aileron-cmd-norm</input>  
-          <gain>-fcs/engine-roll-mix</gain>
+      <pure_gain name="ap/aileron_to_engine1">
+          <input>ap/aileron-cmd-norm</input>  
+          <gain>-ap/engine-roll-mix</gain>
       </pure_gain>
       <summer>
-        <input>fcs/elevator_to_engine1</input>
-        <input>fcs/throttle_to_engine1</input>
-        <input>fcs/aileron_to_engine1</input>
+        <input>ap/elevator_to_engine1</input>
+        <input>ap/throttle_to_engine1</input>
+        <input>ap/aileron_to_engine1</input>
         <output>fcs/throttle-pos-norm[1]</output>
       </summer>
     </channel>
 
     <channel name="Engine2">
-      <pure_gain name="fcs/elevator_to_engine2">
-        <input>fcs/elevator-cmd-norm</input>
-        <gain>fcs/engine-pitch-mix</gain>
+      <pure_gain name="ap/elevator_to_engine2">
+        <input>ap/elevator-cmd-norm</input>
+        <gain>ap/engine-pitch-mix</gain>
       </pure_gain>
-      <pure_gain name="fcs/throttle_to_engine2">
-        <input>fcs/throttle-cmd-norm</input>
-        <gain>fcs/engine-thrust-mix</gain>
+      <pure_gain name="ap/throttle_to_engine2">
+        <input>ap/throttle-cmd-norm</input>
+        <gain>ap/engine-thrust-mix</gain>
       </pure_gain>
-      <pure_gain name="fcs/aileron_to_engine2">
-          <input>fcs/aileron-cmd-norm</input>  
-          <gain>fcs/engine-roll-mix</gain>
+      <pure_gain name="ap/aileron_to_engine2">
+          <input>ap/aileron-cmd-norm</input>  
+          <gain>ap/engine-roll-mix</gain>
       </pure_gain>
       <summer>
-        <input>fcs/elevator_to_engine2</input>
-        <input>fcs/throttle_to_engine2</input>
-        <input>fcs/aileron_to_engine2</input>
+        <input>ap/elevator_to_engine2</input>
+        <input>ap/throttle_to_engine2</input>
+        <input>ap/aileron_to_engine2</input>
         <output>fcs/throttle-pos-norm[2]</output>
       </summer>
     </channel>
     
     <channel name="Engine3">
-      <pure_gain name="fcs/elevator_to_engine3">
-        <input>-fcs/elevator-cmd-norm</input>
-        <gain>fcs/engine-pitch-mix</gain>
+      <pure_gain name="ap/elevator_to_engine3">
+        <input>-ap/elevator-cmd-norm</input>
+        <gain>ap/engine-pitch-mix</gain>
       </pure_gain>
-      <pure_gain name="fcs/throttle_to_engine3">
-        <input>fcs/throttle-cmd-norm</input>
-        <gain>fcs/engine-thrust-mix</gain>
+      <pure_gain name="ap/throttle_to_engine3">
+        <input>ap/throttle-cmd-norm</input>
+        <gain>ap/engine-thrust-mix</gain>
       </pure_gain>
-      <pure_gain name="fcs/aileron_to_engine3">
-          <input>fcs/aileron-cmd-norm</input>  
-          <gain>fcs/engine-roll-mix</gain>
+      <pure_gain name="ap/aileron_to_engine3">
+          <input>ap/aileron-cmd-norm</input>  
+          <gain>ap/engine-roll-mix</gain>
       </pure_gain>
       <summer>
-        <input>fcs/elevator_to_engine3</input>
-        <input>fcs/throttle_to_engine3</input>
-        <input>fcs/aileron_to_engine3</input>
+        <input>ap/elevator_to_engine3</input>
+        <input>ap/throttle_to_engine3</input>
+        <input>ap/aileron_to_engine3</input>
         <output>fcs/throttle-pos-norm[3]</output>
       </summer>
     </channel>
       
   </flight_control>
-
+  
     
     
     
