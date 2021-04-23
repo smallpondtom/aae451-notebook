@@ -145,7 +145,14 @@
             </tableData>
         </table>
     </function> -->
-    
+
+      
+      
+
+<!--============================================================================================== -->
+<!-- MIXING ====================================================================================== -->
+      
+      
     <function name="ap/engine-roll-mix">
         <table>
             <independentVar>velocities/vt-fps</independentVar>
@@ -158,6 +165,8 @@
                 400 0
                 500 0
                 600 0
+                700 0
+                800 0
             </tableData>
         </table>
     </function>
@@ -188,6 +197,8 @@
                 400 0
                 500 0
                 600 0
+                700 0
+                800 0
             </tableData>
         </table>
     </function>
@@ -217,6 +228,8 @@
                 400 1
                 500 1
                 600 1
+                700 1
+                800 1
             </tableData>
         </table>
     </function>
@@ -247,6 +260,8 @@
                 400 1
                 500 1
                 600 1
+                700 1
+                800 1
             </tableData>
         </table>
     </function>
@@ -275,6 +290,8 @@
                 400 0.1
                 500 0.1
                 600 0.1
+                700 0.1
+                800 0.1
             </tableData>
         </table>
     </function>
@@ -302,10 +319,15 @@
         </table>
     </function> -->
     
- 
+      
+      
+
+<!--============================================================================= -->
+<!-- CONTROLLER GAINS =========================================================== -->
+
     
     <!-- Kp gain for roll !! still needs revision -->
-    <function name="ap/kp-roll">
+<!--     <function name="ap/kp-roll">
         <table>
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
@@ -313,20 +335,63 @@
                
             </tableData>
         </table>
-    </function> 
+    </function>  -->
       
     <!-- Kd gain for roll !! still needs modification -->
-    <function name="ap/kd-roll">
+<!--     <function name="ap/kd-roll">
         <table>
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
                 0  0.2
             </tableData>
         </table>
-    </function>
+    </function> -->
+      
+
+    <function name="ap/roll-leadlag-c1">
+        <table>
+            <independentVar>velocities/vt-fps</independentVar>
+            <tableData>
+                0    3.869665116524307
+                300  0.1
+                400  0.02
+            </tableData>
+        </table>
+    </function>  
+    <function name="ap/roll-leadlag-c2">
+        <table>
+            <independentVar>velocities/vt-fps</independentVar>
+            <tableData>
+                0    3.870142291663386e-07
+                300  0.1
+                400  0.02
+            </tableData>
+        </table>
+    </function>   
+    <function name="ap/roll-leadlag-c3">
+        <table>
+            <independentVar>velocities/vt-fps</independentVar>
+            <tableData>
+                0    1
+                300  0.1
+                400  0.02
+            </tableData>
+        </table>
+    </function> 
+    <function name="ap/roll-leadlag-c4">
+        <table>
+            <independentVar>velocities/vt-fps</independentVar>
+            <tableData>
+                0    5.050409868300460e+02
+                300  0.1
+                400  0.02
+            </tableData>
+        </table>
+    </function> 
+      
     
     <!-- Kp gain for pitch -->   
-    <function name="ap/kp-pitch">
+<!--     <function name="ap/kp-pitch">
         <table>
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
@@ -334,10 +399,11 @@
                 400 0.01
             </tableData>
         </table>
-    </function>
+    </function> -->
     
+      
     <!-- Kd gain for pitch -->
-    <function name="ap/kd-pitch">
+<!--     <function name="ap/kd-pitch">
         <table>
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
@@ -345,7 +411,52 @@
                 400  0.02
             </tableData>
         </table>
-    </function>
+    </function> -->
+      
+      
+    <function name="ap/pitch-leadlag-c1">
+        <table>
+            <independentVar>velocities/vt-fps</independentVar>
+            <tableData>
+                0    1.886460262928306
+                300  0.1
+                400  0.02
+            </tableData>
+        </table>
+    </function>  
+    <function name="ap/pitch-leadlag-c2">
+        <table>
+            <independentVar>velocities/vt-fps</independentVar>
+            <tableData>
+                0    1.886484450630278e-07
+                300  0.1
+                400  0.02
+            </tableData>
+        </table>
+    </function>   
+    <function name="ap/pitch-leadlag-c3">
+        <table>
+            <independentVar>velocities/vt-fps</independentVar>
+            <tableData>
+                0    1
+                300  0.1
+                400  0.02
+            </tableData>
+        </table>
+    </function> 
+    <function name="ap/pitch-leadlag-c4">
+        <table>
+            <independentVar>velocities/vt-fps</independentVar>
+            <tableData>
+                0    1.482717022332950e+02
+                300  0.1
+                400  0.02
+            </tableData>
+        </table>
+    </function> 
+      
+      
+      
       
     <!-- Kp yaw -->
     <function name="ap/kp-yaw">
@@ -368,25 +479,76 @@
     </function>  
     
     <!-- Kp for altitude -->
-    <function name="ap/kp-h">
+<!--     <function name="ap/kp-h">
         <table>
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
                 200   0.02
             </tableData>
         </table>
-    </function>  
+    </function>   -->
     
     <!-- Kd for altitude -->
-    <function name="ap/kd-h">
+<!--     <function name="ap/kd-h">
         <table>
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
                 200   0.2
             </tableData>
         </table>
-    </function>
-    
+    </function> -->
+
+
+    <function name="ap/h-leadlag-c1">
+        <table>
+            <independentVar>velocities/vt-fps</independentVar>
+            <tableData>
+                0    0.253697563993244
+                300  0.1
+                400  0.02
+            </tableData>
+        </table>
+    </function>  
+    <function name="ap/h-leadlag-c2">
+        <table>
+            <independentVar>velocities/vt-fps</independentVar>
+            <tableData>
+                0    2.536990166972477e-08
+                300  0.1
+                400  0.02
+            </tableData>
+        </table>
+    </function>   
+    <function name="ap/h-leadlag-c3">
+        <table>
+            <independentVar>velocities/vt-fps</independentVar>
+            <tableData>
+                0    1
+                300  0.1
+                400  0.02
+            </tableData>
+        </table>
+    </function> 
+    <function name="ap/h-leadlag-c4">
+        <table>
+            <independentVar>velocities/vt-fps</independentVar>
+            <tableData>
+                0    27.834362836369799
+                300  0.1
+                400  0.02
+            </tableData>
+        </table>
+    </function> 
+      
+      
+      
+      
+      
+      
+<!--================================================================================== -->
+<!-- TRIMMING ======================================================================== -->
+      
+      
     <!-- new stuff -->
     <function name="ap/aileron-trim">
         <table>
@@ -403,6 +565,8 @@
                 400 0.00010420066389424295
                 500 8.349359458236942e-05
                 600 6.959126654189497e-05
+                700 5.9640159220905e-05
+                790 -0.001197839529998835
             </tableData>
         </table>
     </function>
@@ -423,6 +587,8 @@
                 400 0.08551643606006519
                 500 0.017498925714241952
                 600 -0.013497897128785765
+                700 -0.029532605880449196
+                790 -0.04115516505024993
             </tableData>
         </table>
     </function>
@@ -443,6 +609,8 @@
                 400 0.0003504229051416255
                 500 0.00028196277769138337
                 600 0.00023516880789841807
+                700 0.00020143673596050504
+                790 2.1757069520789596e-05
             </tableData>
         </table>
     </function>
@@ -463,6 +631,8 @@
               400 0.33089755187552056
               500 0.4527469433925268
               600 0.5915598389286832
+              700 0.7718041588725193
+              790 0.998674557812376
             </tableData>
         </table>
     </function>
@@ -483,6 +653,8 @@
               400 0.2752808924424831
               500 -0.8373586120047419
               600 -1.2816403205901106
+              700 -1.4571103835440984
+              790 -1.6017987431896532
             </tableData>
         </table>
     </function>
@@ -553,6 +725,12 @@
       </pure_gain>
     </channel> -->
       
+
+      
+      
+<!--=========================================================================== -->
+<!-- CONTROLLERS ============================================================== -->
+      
     <!-- new version of gear -->
     <channel name="Gear">
       <lag_filter name="ap/gear-servo">
@@ -589,7 +767,7 @@
         <input>ap/phi-deg-cmd</input>
         <input>-attitude/phi-deg</input>
       </summer>
-      <pid name="ap/roll-pid">
+<!--       <pid name="ap/roll-pid">
         <input>ap/roll-error</input>
         <kp>ap/kp-roll</kp>
         <ki> 0 </ki>
@@ -598,10 +776,25 @@
             <min>-0.1</min>
             <max>0.1</max>
         </clipto>
-      </pid>
+      </pid> -->
+      <lead_lag_filter name="ap/roll-leadlag"> <!-- replaced PID with a lead-lag to have low-pass filter -->
+        <input>ap/roll-error</input>
+        <c1>ap/roll-leadlag-c1</c1>
+        <c2>ap/roll-leadlag-c2</c2>
+        <c3>ap/roll-leadlag-c3</c3>
+        <c4>ap/roll-leadlag-c4</c4>
+        <clipto>
+            <min>-0.1</min>
+            <max>0.1</max>
+        </clipto>
+      </lead_lag_filter>  
+      <lag_filter name="ap/roll-leadlag-lp">
+        <input>ap/roll-leadlag</input>
+        <c1> 0.4 </c1>
+      </lag_filter>
       <summer name="ap/roll-auto">
         <input>ap/aileron-trim</input>
-        <input>ap/roll-pid</input>
+        <input>ap/roll-leadlag-lp</input>
       </summer>
       <switch name="ap/aileron-cmd-norm">
         <default value="fcs/aileron-cmd-norm"/>
@@ -618,19 +811,28 @@
         <input>ap/theta-deg-trim</input>
         <input>-attitude/theta-deg</input>
       </summer>
-      <pid name="ap/pitch-pid">
+      <lead_lag_filter name="ap/pitch-leadlag"> <!-- replaced PID with a lead-lag to have low-pass filter -->
         <input>ap/pitch-error</input>
-        <kp>ap/kp-pitch</kp>
+<!--         <kp>ap/kp-pitch</kp>
         <ki> 0 </ki>
-        <kd>ap/kd-pitch</kd>
+        <kd>ap/kd-pitch</kd> -->
+        <c1>ap/pitch-leadlag-c1</c1>
+        <c2>ap/pitch-leadlag-c2</c2>
+        <c3>ap/pitch-leadlag-c3</c3>
+        <c4>ap/pitch-leadlag-c4</c4>
         <clipto>
             <min>-1</min>
             <max>1</max>
         </clipto>
-      </pid>
+      </lead_lag_filter>      
+      <!-- The actuator plant -->
+      <lag_filter name="ap/pitch-leadlag-lp"> 
+        <input>ap/pitch-leadlag</input>
+        <c1> 0.4 </c1>
+      </lag_filter>
       <summer name="ap/pitch-auto">
         <input>ap/elevator-trim</input>
-        <input>ap/pitch-pid</input>
+        <input>ap/pitch-leadlag-lp</input>
       </summer>
       <switch name="ap/elevator-cmd-norm">
         <default value="fcs/elevator-cmd-norm"/>
@@ -652,9 +854,13 @@
             <max>0.1</max>
         </clipto>
       </pid>
+      <lag_filter name="ap/yaw-pid-lp">
+        <input>ap/yaw-pid</input>
+        <c1> 2 </c1>
+      </lag_filter>
       <summer name="ap/yaw-auto">
         <input>ap/rudder-trim</input>
-        <input>ap/yaw-pid</input>
+        <input>ap/yaw-pid-lp</input>
       </summer>
       <switch name="ap/rudder-cmd-norm">
         <default value="fcs/rudder-cmd-norm"/>
@@ -670,7 +876,7 @@
         <input>ap/h-sl-cmd-ft</input>
         <input>-position/h-sl-ft</input>
       </summer>
-      <pid name="ap/h-pid">
+<!--       <pid name="ap/h-pid">
         <input>ap/h-error</input>
         <kp>ap/kp-h</kp>
         <ki>0</ki>
@@ -679,10 +885,26 @@
             <min>-0.05</min>
             <max>0.05</max>
         </clipto>
-      </pid>
+      </pid> -->
+      <lead_lag_filter name="ap/h-leadlag"> <!-- replaced PID with a lead-lag to have low-pass filter -->
+        <input>ap/h-error</input>
+        <c1>ap/h-leadlag-c1</c1>
+        <c2>ap/h-leadlag-c2</c2>
+        <c3>ap/h-leadlag-c3</c3>
+        <c4>ap/h-leadlag-c4</c4>
+        <clipto>
+            <min>-0.05</min>
+            <max>0.05</max>
+        </clipto>
+      </lead_lag_filter>  
+      <!-- The actuator plant -->
+      <lag_filter name="ap/h-leadlag-lp"> 
+        <input>ap/h-leadlag</input>
+        <c1> 0.4 </c1>
+      </lag_filter>
       <summer name="ap/h-auto">
         <input>ap/throttle-trim</input>
-        <input>ap/h-pid</input>
+        <input>ap/h-leadlag-lp</input>
         <clipto>
             <min>0</min>
             <max>1</max>
