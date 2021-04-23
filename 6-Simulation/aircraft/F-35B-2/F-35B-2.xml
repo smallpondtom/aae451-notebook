@@ -812,13 +812,13 @@
             <max>0.1</max>
         </clipto>
       </lead_lag_filter>  
-      <lag_filter name="ap/roll-leadlag-lp">
+<!--       <lag_filter name="ap/roll-leadlag-lp">
         <input>ap/roll-leadlag</input>
         <c1> 0.4 </c1>
-      </lag_filter>
+      </lag_filter> -->
       <summer name="ap/roll-auto">
         <input>ap/aileron-trim</input>
-        <input>ap/roll-leadlag-lp</input>
+        <input>ap/roll-leadlag</input>
       </summer>
       <switch name="ap/aileron-cmd-norm">
         <default value="fcs/aileron-cmd-norm"/>
@@ -850,13 +850,54 @@
         </clipto>
       </lead_lag_filter>      
       <!-- The actuator plant -->
-      <lag_filter name="ap/pitch-leadlag-lp"> 
+<!--       <lag_filter name="ap/pitch-leadlag-lp"> 
         <input>ap/pitch-leadlag</input>
         <c1> 0.4 </c1>
-      </lag_filter>
+      </lag_filter> -->
       <summer name="ap/pitch-auto">
         <input>ap/elevator-trim</input>
-        <input>ap/pitch-leadlag-lp</input>
+        <input>ap/pitch-leadlag</input>
+      </summer>
+      <switch name="ap/elevator-cmd-norm">
+        <default value="fcs/elevator-cmd-norm"/>
+        <test value="ap/pitch-auto">
+          ap/pitch-enable == 1
+        </test>
+      </switch>
+    </channel>
+      
+    <!-- cruise controller for velocity and pitch -->
+    <channel name="cruise-pitch">
+      
+        
+        
+        
+      <summer name="ap/pitch-error">
+        <input>ap/theta-deg-trim</input>
+        <input>-attitude/theta-deg</input>
+      </summer>
+      <lead_lag_filter name="ap/pitch-leadlag"> <!-- replaced PID with a lead-lag to have low-pass filter -->
+        <input>ap/pitch-error</input>
+<!--         <kp>ap/kp-pitch</kp>
+        <ki> 0 </ki>
+        <kd>ap/kd-pitch</kd> -->
+        <c1>ap/pitch-leadlag-c1</c1>
+        <c2>ap/pitch-leadlag-c2</c2>
+        <c3>ap/pitch-leadlag-c3</c3>
+        <c4>ap/pitch-leadlag-c4</c4>
+        <clipto>
+            <min>-0.1</min>
+            <max>0.1</max>
+        </clipto>
+      </lead_lag_filter>      
+      <!-- The actuator plant -->
+<!--       <lag_filter name="ap/pitch-leadlag-lp"> 
+        <input>ap/pitch-leadlag</input>
+        <c1> 0.4 </c1>
+      </lag_filter> -->
+      <summer name="ap/pitch-auto">
+        <input>ap/elevator-trim</input>
+        <input>ap/pitch-leadlag</input>
       </summer>
       <switch name="ap/elevator-cmd-norm">
         <default value="fcs/elevator-cmd-norm"/>
@@ -884,7 +925,7 @@
       </lag_filter>
       <summer name="ap/yaw-auto">
         <input>ap/rudder-trim</input>
-        <input>ap/yaw-pid-lp</input>
+        <input>ap/yaw-pid</input>
       </summer>
       <switch name="ap/rudder-cmd-norm">
         <default value="fcs/rudder-cmd-norm"/>
