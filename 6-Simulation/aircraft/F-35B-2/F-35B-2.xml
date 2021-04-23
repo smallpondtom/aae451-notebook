@@ -867,14 +867,21 @@
     </channel>
       
       
+<<<<<<< HEAD
     <!-- Cruise Pitch control INPUT: Velocity OUTPUT: Pitch angle-->
+=======
+      <!-- Cruise Pitch control INPUT: Velocity OUTPUT: Pitch angle-->
+>>>>>>> master
     <!-- Outer feedback loop -->
       <channel name="cruise-pitch">
         <summer name="ap/velocity-error">
             <input>ap/v-cmd-fps</input>
             <input>-velocities/vt_fps</input>
         </summer>
+<<<<<<< HEAD
     
+=======
+>>>>>>> master
     <pure_gain name="ap/theta-auto">
         <input>ap/velocity-error</input>
         <gain>0.1</gain>
@@ -882,11 +889,19 @@
             <min>-0.2</min>
             <max>0.2</max>
         </clipto>
+<<<<<<< HEAD
     </pure_gain>    
     <!-- End of outer feedback loop -->
           
       <summer name="ap/pitch-error">
         <input>ap/theta-deg-trim</input>
+=======
+    </pure_gain>
+    <!-- End of outer feedback loop -->
+      <summer name="ap/pitch-error">
+        <input>ap/theta-deg-trim</input>
+        <input>ap/theta-auto</input>
+>>>>>>> master
         <input>-attitude/theta-deg</input>
       </summer>
       <lead_lag_filter name="ap/pitch-leadlag"> <!-- replaced PID with a lead-lag to have low-pass filter -->
@@ -902,9 +917,15 @@
             <min>-0.1</min>
             <max>0.1</max>
         </clipto>
+<<<<<<< HEAD
       </lead_lag_filter>      
       <!-- The actuator plant -->
 <!--       <lag_filter name="ap/pitch-leadlag-lp"> 
+=======
+      </lead_lag_filter>
+      <!-- The actuator plant -->
+<!--       <lag_filter name="ap/pitch-leadlag-lp">
+>>>>>>> master
         <input>ap/pitch-leadlag</input>
         <c1> 0.4 </c1>
       </lag_filter> -->
@@ -922,6 +943,10 @@
       
       
       
+<<<<<<< HEAD
+=======
+      
+>>>>>>> master
     <!-- yaw control -->
     <channel name="Yaw">
       <pid name="ap/yaw-pid">
