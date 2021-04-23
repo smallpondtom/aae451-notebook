@@ -353,8 +353,10 @@
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
                 0    3.869665116524307
-                300  0.1
-                400  0.02
+                5    3.869665116524307
+                10   3.869665116524307
+                300  4
+                400  6
             </tableData>
         </table>
     </function>  
@@ -363,8 +365,10 @@
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
                 0    3.870142291663386e-07
-                300  0.1
-                400  0.02
+                5    3.870142291663386e-07
+                10   3.870142291663386e-07
+                300  0.1e-6
+                400  0.02e-5
             </tableData>
         </table>
     </function>   
@@ -373,8 +377,10 @@
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
                 0    1
-                300  0.1
-                400  0.02
+                5    1
+                10   1
+                300  0.1e1
+                400  0.02e2
             </tableData>
         </table>
     </function> 
@@ -383,8 +389,10 @@
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
                 0    5.050409868300460e+02
-                300  0.1
-                400  0.02
+                5    5.050409868300460e+02
+                10   5.050409868300460e+02
+                300  0.6e3
+                400  0.08e4
             </tableData>
         </table>
     </function> 
@@ -419,8 +427,10 @@
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
                 0    1.886460262928306
-                300  0.1
-                400  0.02
+                5    1.886460262928306
+                10   1.886460262928306
+                300  4
+                400  6
             </tableData>
         </table>
     </function>  
@@ -429,8 +439,10 @@
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
                 0    1.886484450630278e-07
-                300  0.1
-                400  0.02
+                5    1.886484450630278e-07
+                10   1.886484450630278e-07
+                300  0.1e-5
+                400  0.02e-4
             </tableData>
         </table>
     </function>   
@@ -439,8 +451,10 @@
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
                 0    1
-                300  0.1
-                400  0.02
+                5    1
+                10   1
+                300  0.1e1
+                400  0.02e2
             </tableData>
         </table>
     </function> 
@@ -449,8 +463,10 @@
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
                 0    1.482717022332950e+02
-                300  0.1
-                400  0.02
+                5    1.482717022332950e+02
+                10   1.482717022332950e+02
+                300  2e2
+                400  3e2
             </tableData>
         </table>
     </function> 
@@ -504,8 +520,10 @@
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
                 0    0.253697563993244
-                300  0.1
-                400  0.02
+                5    0.253697563993244
+                10   0.253697563993244
+                300  1
+                400  2
             </tableData>
         </table>
     </function>  
@@ -514,8 +532,10 @@
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
                 0    2.536990166972477e-08
-                300  0.1
-                400  0.02
+                5    2.536990166972477e-08
+                10   2.536990166972477e-08
+                300  0.0000001
+                400  0.0000002
             </tableData>
         </table>
     </function>   
@@ -524,8 +544,10 @@
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
                 0    1
-                300  0.1
-                400  0.02
+                5    1
+                10   1
+                300  1
+                400  1
             </tableData>
         </table>
     </function> 
@@ -534,8 +556,10 @@
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
                 0    27.834362836369799
-                300  0.1
-                400  0.02
+                5    27.834362836369799
+                10   27.834362836369799
+                300  50
+                400  70
             </tableData>
         </table>
     </function> 
@@ -821,8 +845,8 @@
         <c3>ap/pitch-leadlag-c3</c3>
         <c4>ap/pitch-leadlag-c4</c4>
         <clipto>
-            <min>-1</min>
-            <max>1</max>
+            <min>-0.1</min>
+            <max>0.1</max>
         </clipto>
       </lead_lag_filter>      
       <!-- The actuator plant -->
