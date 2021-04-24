@@ -131,6 +131,8 @@
     <property value="0" description="enable auto gear deployment">ap/gear-enable</property>
     <property value="0" description="enable altitude loop">ap/h-enable</property>
     <property value="596" description="altitude above sea level setpoint ft">ap/h-sl-cmd-ft</property>
+
+      
       
     
     <!-- rename the fcs to ap --> 
@@ -348,7 +350,7 @@
     </function> -->
       
 
-    <function name="ap/roll-leadlag-c1">
+<!--     <function name="ap/roll-leadlag-c1">
         <table>
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
@@ -396,7 +398,7 @@
             </tableData>
         </table>
     </function> 
-      
+       -->
     
     <!-- Kp gain for pitch -->   
 <!--     <function name="ap/kp-pitch">
@@ -422,7 +424,7 @@
     </function> -->
       
       
-    <function name="ap/pitch-leadlag-c1">
+<!--     <function name="ap/pitch-leadlag-c1">
         <table>
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
@@ -469,30 +471,30 @@
                 400  3e2
             </tableData>
         </table>
-    </function> 
+    </function>  -->
       
       
       
       
     <!-- Kp yaw -->
-    <function name="ap/kp-yaw">
+<!--     <function name="ap/kp-yaw">
         <table>
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
                 0   0.01
             </tableData>
         </table>
-    </function>
+    </function> -->
     
     <!-- Kd for yaw -->
-    <function name="ap/kd-yaw">
+<!--     <function name="ap/kd-yaw">
         <table>
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
                 0  0.02
             </tableData>
         </table>
-    </function>  
+    </function>   -->
     
     <!-- Kp for altitude -->
 <!--     <function name="ap/kp-h">
@@ -515,7 +517,7 @@
     </function> -->
 
 
-    <function name="ap/h-leadlag-c1">
+<!--     <function name="ap/h-leadlag-c1">
         <table>
             <independentVar>velocities/vt-fps</independentVar>
             <tableData>
@@ -562,7 +564,7 @@
                 400  70
             </tableData>
         </table>
-    </function> 
+    </function>  -->
       
       
       
@@ -573,7 +575,6 @@
 <!-- TRIMMING ======================================================================== -->
       
       
-    <!-- new stuff -->
     <function name="ap/aileron-trim">
         <table>
             <independentVar>velocities/vt-fps</independentVar>
@@ -595,7 +596,6 @@
         </table>
     </function>
     
-    <!-- new stuff -->
     <function name="ap/elevator-trim">
         <table>
             <independentVar>velocities/vt-fps</independentVar>
@@ -617,7 +617,6 @@
         </table>
     </function>
       
-    <!-- new stuff -->
     <function name="ap/rudder-trim">
         <table>
             <independentVar>velocities/vt-fps</independentVar>
@@ -639,7 +638,6 @@
         </table>
     </function>
     
-    <!-- new stuff -->
     <function name="ap/throttle-trim">
         <table>
             <independentVar>velocities/vt-fps</independentVar>
@@ -661,7 +659,6 @@
         </table>
     </function>
     
-    <!-- new stuff -->
     <function name="ap/theta-deg-trim">
         <table>
             <independentVar>velocities/vt-fps</independentVar>
@@ -791,31 +788,17 @@
         <input>ap/phi-deg-cmd</input>
         <input>-attitude/phi-deg</input>
       </summer>
-<!--       <pid name="ap/roll-pid">
-        <input>ap/roll-error</input>
-        <kp>ap/kp-roll</kp>
-        <ki> 0 </ki>
-        <kd>ap/kd-roll</kd>
-        <clipto>
-            <min>-0.1</min>
-            <max>0.1</max>
-        </clipto>
-      </pid> -->
       <lead_lag_filter name="ap/roll-leadlag"> <!-- replaced PID with a lead-lag to have low-pass filter -->
         <input>ap/roll-error</input>
-        <c1>ap/roll-leadlag-c1</c1>
-        <c2>ap/roll-leadlag-c2</c2>
-        <c3>ap/roll-leadlag-c3</c3>
-        <c4>ap/roll-leadlag-c4</c4>
+        <c1>0.2355</c1>
+        <c2>0.205000</c2>
+        <c3>1.00</c3>
+        <c4>10.00</c4>
         <clipto>
             <min>-0.1</min>
             <max>0.1</max>
         </clipto>
       </lead_lag_filter>  
-<!--       <lag_filter name="ap/roll-leadlag-lp">
-        <input>ap/roll-leadlag</input>
-        <c1> 0.4 </c1>
-      </lag_filter> -->
       <summer name="ap/roll-auto">
         <input>ap/aileron-trim</input>
         <input>ap/roll-leadlag</input>
@@ -837,23 +820,15 @@
       </summer>
       <lead_lag_filter name="ap/pitch-leadlag"> <!-- replaced PID with a lead-lag to have low-pass filter -->
         <input>ap/pitch-error</input>
-<!--         <kp>ap/kp-pitch</kp>
-        <ki> 0 </ki>
-        <kd>ap/kd-pitch</kd> -->
-        <c1>ap/pitch-leadlag-c1</c1>
-        <c2>ap/pitch-leadlag-c2</c2>
-        <c3>ap/pitch-leadlag-c3</c3>
-        <c4>ap/pitch-leadlag-c4</c4>
+        <c1>4.505</c1>
+        <c2>0.075</c2>
+        <c3>1.00</c3>
+        <c4>15</c4>
         <clipto>
             <min>-0.1</min>
             <max>0.1</max>
         </clipto>
       </lead_lag_filter>      
-      <!-- The actuator plant -->
-<!--       <lag_filter name="ap/pitch-leadlag-lp"> 
-        <input>ap/pitch-leadlag</input>
-        <c1> 0.4 </c1>
-      </lag_filter> -->
       <summer name="ap/pitch-auto">
         <input>ap/elevator-trim</input>
         <input>ap/pitch-leadlag</input>
@@ -866,54 +841,96 @@
       </switch>
     </channel>
       
-    <!-- cruise controller for velocity and pitch -->
-    <channel name="cruise-pitch">
-      
-        
-        
-        
-      <summer name="ap/pitch-error">
-        <input>ap/theta-deg-trim</input>
-        <input>-attitude/theta-deg</input>
+    
+    <!-- yaw control with engine pitching -->
+    <channel name ="RightEngineThrustVector">
+      <summer name="ap/yaw-error-deg">
+        <input>ap/heading-cmd-deg</input>
+        <input>-attitude/psi-deg</input>
       </summer>
-      <lead_lag_filter name="ap/pitch-leadlag"> <!-- replaced PID with a lead-lag to have low-pass filter -->
-        <input>ap/pitch-error</input>
-<!--         <kp>ap/kp-pitch</kp>
-        <ki> 0 </ki>
-        <kd>ap/kd-pitch</kd> -->
-        <c1>ap/pitch-leadlag-c1</c1>
-        <c2>ap/pitch-leadlag-c2</c2>
-        <c3>ap/pitch-leadlag-c3</c3>
-        <c4>ap/pitch-leadlag-c4</c4>
+      <lead_lag_filter name="ap/thrust-vector"> 
+        <input>ap/yaw-error-deg</input>
+        <c1>4.505</c1>
+        <c2>0.075</c2>
+        <c3>1.00</c3>
+        <c4>15</c4>
         <clipto>
             <min>-0.1</min>
             <max>0.1</max>
         </clipto>
       </lead_lag_filter>      
-      <!-- The actuator plant -->
-<!--       <lag_filter name="ap/pitch-leadlag-lp"> 
-        <input>ap/pitch-leadlag</input>
-        <c1> 0.4 </c1>
-      </lag_filter> -->
-      <summer name="ap/pitch-auto">
-        <input>ap/elevator-trim</input>
-        <input>ap/pitch-leadlag</input>
-      </summer>
-      <switch name="ap/elevator-cmd-norm">
-        <default value="fcs/elevator-cmd-norm"/>
-        <test value="ap/pitch-auto">
-          ap/pitch-enable == 1
-        </test>
-      </switch>
-    </channel>
+      <pure_gain name="ap/thrustvector_to_pitch0">
+        <input>ap/thrust-vector</input>
+        <gain>1</gain>
+        <output>propulsion/engine/pitch-angle-rad</output>
+      </pure_gain>
       
-    <!-- yaw control -->
+      <lead_lag_filter name="ap/thrust-vector"> 
+        <input>ap/yaw-error-deg</input>
+        <c1>4.505</c1>
+        <c2>0.075</c2>
+        <c3>1.00</c3>
+        <c4>15</c4>
+        <clipto>
+            <min>-0.1</min>
+            <max>0.1</max>
+        </clipto>
+      </lead_lag_filter>
+      <pure_gain name="ap/thrustvector_to_pitch1">
+        <input>ap/thrust-vector</input>
+        <gain>1</gain>
+        <output>propulsion/engine[1]/pitch-angle-rad</output>
+      </pure_gain>  
+    </channel>  
+        
+        
+    <channel name ="LeftEngineThrustVector">
+      <summer name="ap/yaw-error-deg">
+        <input>ap/heading-cmd-deg</input>
+        <input>-attitude/psi-deg</input>
+      </summer>
+      <lead_lag_filter name="ap/thrust-vector"> 
+        <input>ap/yaw-error-deg</input>
+        <c1>4.505</c1>
+        <c2>0.075</c2>
+        <c3>1.00</c3>
+        <c4>15</c4>
+        <clipto>
+            <min>-0.1</min>
+            <max>0.1</max>
+        </clipto>
+      </lead_lag_filter>      
+      <pure_gain name="ap/thrustvector_to_pitch2">
+        <input>ap/thrust-vector</input>
+        <gain>1</gain>
+        <output>propulsion/engine[2]/pitch-angle-rad</output>
+      </pure_gain>
+      
+      <lead_lag_filter name="ap/thrust-vector"> 
+        <input>ap/yaw-error-deg</input>
+        <c1>4.505</c1>
+        <c2>0.075</c2>
+        <c3>1.00</c3>
+        <c4>15</c4>
+        <clipto>
+            <min>-0.1</min>
+            <max>0.1</max>
+        </clipto>
+      </lead_lag_filter>
+      <pure_gain name="ap/thrustvector_to_pitch3">
+        <input>ap/thrust-vector</input>
+        <gain>1</gain>
+        <output>propulsion/engine[3]/pitch-angle-rad</output>
+      </pure_gain>
+    </channel>  
+      
+    <!-- yaw control w/ rudder -->
     <channel name="Yaw">
       <pid name="ap/yaw-pid">
         <input>-velocities/r-rad_sec</input>
-        <kp>ap/kp-yaw</kp>
+        <kp>0</kp>
         <ki> 0 </ki>
-        <kd>ap/kd-yaw</kd>
+        <kd>0</kd>
         <clipto>
             <min>-0.1</min>
             <max>0.1</max>
@@ -935,41 +952,29 @@
       </switch>
     </channel>  
 
+      
+      
+      
     <!-- altitude control -->
     <channel name="Altitude">
       <summer name="ap/h-error">
         <input>ap/h-sl-cmd-ft</input>
         <input>-position/h-sl-ft</input>
       </summer>
-<!--       <pid name="ap/h-pid">
-        <input>ap/h-error</input>
-        <kp>ap/kp-h</kp>
-        <ki>0</ki>
-        <kd>ap/kd-h</kd>
-        <clipto>
-            <min>-0.05</min>
-            <max>0.05</max>
-        </clipto>
-      </pid> -->
       <lead_lag_filter name="ap/h-leadlag"> <!-- replaced PID with a lead-lag to have low-pass filter -->
         <input>ap/h-error</input>
-        <c1>ap/h-leadlag-c1</c1>
-        <c2>ap/h-leadlag-c2</c2>
-        <c3>ap/h-leadlag-c3</c3>
-        <c4>ap/h-leadlag-c4</c4>
+        <c1>0.0031</c1>
+        <c2>0.00024</c2>
+        <c3>1</c3>
+        <c4>0.6</c4>
         <clipto>
             <min>-0.05</min>
             <max>0.05</max>
         </clipto>
       </lead_lag_filter>  
-      <!-- The actuator plant -->
-      <lag_filter name="ap/h-leadlag-lp"> 
-        <input>ap/h-leadlag</input>
-        <c1> 0.4 </c1>
-      </lag_filter>
       <summer name="ap/h-auto">
         <input>ap/throttle-trim</input>
-        <input>ap/h-leadlag-lp</input>
+        <input>ap/h-leadlag</input>
         <clipto>
             <min>0</min>
             <max>1</max>
@@ -1126,9 +1131,17 @@
     </channel>
 
       
-    <channel name="Engine0_Yaw">
-      <pure_gain name="ap/rudder_to_engine0_yaw">
-        <input>ap/rudder-cmd-norm</input>
+    <channel name="Engine0_Pitch">
+      <summer name="ap/engine0-pitch-cmd-norm">
+        <input>-ap/rudder-cmd-norm</input>
+        <input>ap/thrustvector_to_pitch0</input>
+        <clipto>
+            <min>-0.1</min>
+            <max>0.1</max>
+        </clipto>
+      </summer>
+      <pure_gain name="ap/engine0-nozzle-pitch">
+        <input>ap/engine0-pitch-cmd-norm</input>
         <gain>ap/engine-yaw-mix</gain>
         <output>propulsion/engine/pitch-angle-deg</output>
         <clipto>
@@ -1160,9 +1173,17 @@
     </channel>
 
       
-    <channel name="Engine1_Yaw">
-      <pure_gain name="ap/rudder_to_engine1_yaw">
-        <input>ap/rudder-cmd-norm</input>
+    <channel name="Engine1_Pitch">
+      <summer name="ap/engine1-pitch-cmd-norm">
+        <input>-ap/rudder-cmd-norm</input>
+        <input>ap/thrustvector_to_pitch1</input>
+        <clipto>
+            <min>-0.1</min>
+            <max>0.1</max>
+        </clipto>
+      </summer>
+      <pure_gain name="ap/engine1-nozzle-pitch">
+        <input>ap/engine1-pitch-cmd-norm</input>
         <gain>ap/engine-yaw-mix</gain>
         <output>propulsion/engine[1]/pitch-angle-deg</output>
         <clipto>
@@ -1194,9 +1215,17 @@
     </channel>
 
       
-    <channel name="Engine2_Yaw">
-      <pure_gain name="ap/rudder_to_engine2_yaw">
+    <channel name="Engine2_Pitch">
+      <summer name="ap/engine2-pitch-cmd-norm">
         <input>ap/rudder-cmd-norm</input>
+        <input>ap/thrustvector_to_pitch2</input>
+        <clipto>
+            <min>-0.1</min>
+            <max>0.1</max>
+        </clipto>
+      </summer>
+      <pure_gain name="ap/engine2-nozzle-pitch">
+        <input>ap/engine2-pitch-cmd-norm</input>
         <gain>ap/engine-yaw-mix</gain>
         <output>propulsion/engine[2]/pitch-angle-deg</output>
         <clipto>
@@ -1227,9 +1256,17 @@
       </summer>
     </channel>
 
-    <channel name="Engine3_Yaw">
-      <pure_gain name="ap/rudder_to_engine3_yaw">
-        <input>ap/rudder-cmd-norm</input>
+    <channel name="Engine3_Pitch">
+      <summer name="ap/engine3-pitch-cmd-norm">
+        <input>-ap/rudder-cmd-norm</input>
+        <input>ap/thrustvector_to_pitch3</input>
+        <clipto>
+            <min>-0.1</min>
+            <max>0.1</max>
+        </clipto>
+      </summer>
+      <pure_gain name="ap/engine3-nozzle-pitch">
+        <input>ap/engine3-pitch-cmd-norm</input>
         <gain>ap/engine-yaw-mix</gain>
         <output>propulsion/engine[3]/pitch-angle-deg</output>
         <clipto>

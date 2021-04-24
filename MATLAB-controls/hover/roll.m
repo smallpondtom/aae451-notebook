@@ -5,10 +5,6 @@ clear all; close all; clc;
 num = 76.15;  % numerator 
 den = [1, 0, 0];  % denominator
 
-% Kp = 7.66302615547072e-10;
-% Kd = 0.0076620813293718;
-% N = 505.040986830046;
-
 Kp = 0.0205;
 Kd = 0.0215;
 N = 10;
