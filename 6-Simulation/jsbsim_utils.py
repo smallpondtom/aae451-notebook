@@ -217,7 +217,7 @@ def linearize(aircraft, states, states_deriv, inputs, outputs, ic, dx, n_round=3
             raise KeyError(key)
     
     for key in states_deriv:
-        if key not in fdm_props.keys() and key != 'approximate':
+        if key not in fdm_props.keys() and key != 'approximate' and not callable(key):
             raise KeyError(key)
     
     n = len(states)
@@ -242,6 +242,8 @@ def linearize(aircraft, states, states_deriv, inputs, outputs, ic, dx, n_round=3
         for j, state_deriv in enumerate(states_deriv):
             if state_deriv == 'approximate':
                 A[j, i] = (fdm[states[j]] - start[states[j]])/fdm.get_delta_t()
+            elif callable(state_deriv):
+                A[j, i] = (state_deriv(fdm) - state_deriv(start)) / dx
             else:
                 A[j, i] = (fdm[state_deriv] - start[state_deriv]) / dx
         for j, output in enumerate(outputs):
@@ -260,6 +262,8 @@ def linearize(aircraft, states, states_deriv, inputs, outputs, ic, dx, n_round=3
         for j, state_deriv in enumerate(states_deriv):
             if state_deriv == 'approximate':
                 B[j, i] = (fdm[states[j]] - start[states[j]])/fdm.get_delta_t()
+            elif callable(state_deriv):
+                B[j, i] = (state_deriv(fdm) - state_deriv(start)) / dx
             else:
                 B[j, i] = (fdm[state_deriv] - start[state_deriv]) / dx
         for j, output in enumerate(outputs):
