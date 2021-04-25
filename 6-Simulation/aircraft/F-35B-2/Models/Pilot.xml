@@ -7,7 +7,7 @@
 	<animation>
         <type>range</type>
         <min-m>0</min-m>
-        <max-m>12000</max-m>
+        <max-m>000</max-m>
     </animation>
 	
 </PropertyList>

@@ -9,7 +9,7 @@
 	<model>
 		<path>Aircraft/F-35B-2/Models/Pilot.xml</path>
 		<offsets>
-			<x-m>-5.20</x-m>
+			<x-m>2.20</x-m>
 			<y-m> 0.00</y-m>
 			<z-m> 0.68</z-m>
 		</offsets>
@@ -25,7 +25,7 @@
 	<model>
 		<path>Aircraft/F-35B-2/Models/Instruments/MFD/MFD.xml</path>
 		<offsets>
-			<x-m>0</x-m>
+			<x-m>3</x-m>
 			<y-m>0</y-m>
 			<z-m>0</z-m>
 			<pitch-offset>0</pitch-offset>

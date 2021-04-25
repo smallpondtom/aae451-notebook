@@ -1,22 +1,409 @@
-\begin{lstlisting}[language=Python]
-%load_ext autoreload
-%autoreload 2
-# pull in new changes to python modules without having to restart notebook
+\documentclass[11pt]{article}
 
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import json 
-from jsbsim_utils import Logger, trim, simulate, linearize, rootlocus, clean_tf
-import control 
-\end{lstlisting}
+    \usepackage[breakable]{tcolorbox}
+    \usepackage{parskip} % Stop auto-indenting (to mimic markdown behaviour)
+    
+    \usepackage{iftex}
+    \ifPDFTeX
+    	\usepackage[T1]{fontenc}
+    	\usepackage{mathpazo}
+    \else
+    	\usepackage{fontspec}
+    \fi
 
-\begin{lstlisting}[language=Python]
-all_data = dict()
-\end{lstlisting}
+    % Basic figure setup, for now with no caption control since it's done
+    % automatically by Pandoc (which extracts ![](path) syntax from Markdown).
+    \usepackage{graphicx}
+    % Maintain compatibility with old templates. Remove in nbconvert 6.0
+    \let\Oldincludegraphics\includegraphics
+    % Ensure that by default, figures have no caption (until we provide a
+    % proper Figure object with a Caption API and a way to capture that
+    % in the conversion process - todo).
+    \usepackage{caption}
+    \DeclareCaptionFormat{nocaption}{}
+    \captionsetup{format=nocaption,aboveskip=0pt,belowskip=0pt}
 
-Nonlinear-dynamics of aircraft
+    \usepackage{float}
+    \floatplacement{figure}{H} % forces figures to be placed at the correct location
+    \usepackage{xcolor} % Allow colors to be defined
+    \usepackage{enumerate} % Needed for markdown enumerations to work
+    \usepackage{geometry} % Used to adjust the document margins
+    \usepackage{amsmath} % Equations
+    \usepackage{amssymb} % Equations
+    \usepackage{textcomp} % defines textquotesingle
+    % Hack from http://tex.stackexchange.com/a/47451/13684:
+    \AtBeginDocument{%
+        \def\PYZsq{\textquotesingle}% Upright quotes in Pygmentized code
+    }
+    \usepackage{upquote} % Upright quotes for verbatim code
+    \usepackage{eurosym} % defines \euro
+    \usepackage[mathletters]{ucs} % Extended unicode (utf-8) support
+    \usepackage{fancyvrb} % verbatim replacement that allows latex
+    \usepackage{grffile} % extends the file name processing of package graphics 
+                         % to support a larger range
+    \makeatletter % fix for old versions of grffile with XeLaTeX
+    \@ifpackagelater{grffile}{2019/11/01}
+    {
+      % Do nothing on new versions
+    }
+    {
+      \def\Gread@@xetex#1{%
+        \IfFileExists{"\Gin@base".bb}%
+        {\Gread@eps{\Gin@base.bb}}%
+        {\Gread@@xetex@aux#1}%
+      }
+    }
+    \makeatother
+    \usepackage[Export]{adjustbox} % Used to constrain images to a maximum size
+    \adjustboxset{max size={0.9\linewidth}{0.9\paperheight}}
+
+    % The hyperref package gives us a pdf with properly built
+    % internal navigation ('pdf bookmarks' for the table of contents,
+    % internal cross-reference links, web links for URLs, etc.)
+    \usepackage{hyperref}
+    % The default LaTeX title has an obnoxious amount of whitespace. By default,
+    % titling removes some of it. It also provides customization options.
+    \usepackage{titling}
+    \usepackage{longtable} % longtable support required by pandoc >1.10
+    \usepackage{booktabs}  % table support for pandoc > 1.12.2
+    \usepackage[inline]{enumitem} % IRkernel/repr support (it uses the enumerate* environment)
+    \usepackage[normalem]{ulem} % ulem is needed to support strikethroughs (\sout)
+                                % normalem makes italics be italics, not underlines
+    \usepackage{mathrsfs}
+    
+
+    
+    % Colors for the hyperref package
+    \definecolor{urlcolor}{rgb}{0,.145,.698}
+    \definecolor{linkcolor}{rgb}{.71,0.21,0.01}
+    \definecolor{citecolor}{rgb}{.12,.54,.11}
+
+    % ANSI colors
+    \definecolor{ansi-black}{HTML}{3E424D}
+    \definecolor{ansi-black-intense}{HTML}{282C36}
+    \definecolor{ansi-red}{HTML}{E75C58}
+    \definecolor{ansi-red-intense}{HTML}{B22B31}
+    \definecolor{ansi-green}{HTML}{00A250}
+    \definecolor{ansi-green-intense}{HTML}{007427}
+    \definecolor{ansi-yellow}{HTML}{DDB62B}
+    \definecolor{ansi-yellow-intense}{HTML}{B27D12}
+    \definecolor{ansi-blue}{HTML}{208FFB}
+    \definecolor{ansi-blue-intense}{HTML}{0065CA}
+    \definecolor{ansi-magenta}{HTML}{D160C4}
+    \definecolor{ansi-magenta-intense}{HTML}{A03196}
+    \definecolor{ansi-cyan}{HTML}{60C6C8}
+    \definecolor{ansi-cyan-intense}{HTML}{258F8F}
+    \definecolor{ansi-white}{HTML}{C5C1B4}
+    \definecolor{ansi-white-intense}{HTML}{A1A6B2}
+    \definecolor{ansi-default-inverse-fg}{HTML}{FFFFFF}
+    \definecolor{ansi-default-inverse-bg}{HTML}{000000}
+
+    % common color for the border for error outputs.
+    \definecolor{outerrorbackground}{HTML}{FFDFDF}
+
+    % commands and environments needed by pandoc snippets
+    % extracted from the output of `pandoc -s`
+    \providecommand{\tightlist}{%
+      \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+    \DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+    % Add ',fontsize=\small' for more characters per line
+    \newenvironment{Shaded}{}{}
+    \newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+    \newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{{#1}}}
+    \newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+    \newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+    \newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+    \newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{{#1}}}}
+    \newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{{#1}}}
+    \newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+    \newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{{#1}}}
+    \newcommand{\RegionMarkerTok}[1]{{#1}}
+    \newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+    \newcommand{\NormalTok}[1]{{#1}}
+    
+    % Additional commands for more recent versions of Pandoc
+    \newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.53,0.00,0.00}{{#1}}}
+    \newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.73,0.40,0.53}{{#1}}}
+    \newcommand{\ImportTok}[1]{{#1}}
+    \newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.73,0.13,0.13}{\textit{{#1}}}}
+    \newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    \newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    \newcommand{\VariableTok}[1]{\textcolor[rgb]{0.10,0.09,0.49}{{#1}}}
+    \newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+    \newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.40,0.40,0.40}{{#1}}}
+    \newcommand{\BuiltInTok}[1]{{#1}}
+    \newcommand{\ExtensionTok}[1]{{#1}}
+    \newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.74,0.48,0.00}{{#1}}}
+    \newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.49,0.56,0.16}{{#1}}}
+    \newcommand{\InformationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    \newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    
+    
+    % Define a nice break command that doesn't care if a line doesn't already
+    % exist.
+    \def\br{\hspace*{\fill} \\* }
+    % Math Jax compatibility definitions
+    \def\gt{>}
+    \def\lt{<}
+    \let\Oldtex\TeX
+    \let\Oldlatex\LaTeX
+    \renewcommand{\TeX}{\textrm{\Oldtex}}
+    \renewcommand{\LaTeX}{\textrm{\Oldlatex}}
+    % Document parameters
+    % Document title
+    \title{Trim}
+    
+    
+    
+    
+    
+% Pygments definitions
+\makeatletter
+\def\PY@reset{\let\PY@it=\relax \let\PY@bf=\relax%
+    \let\PY@ul=\relax \let\PY@tc=\relax%
+    \let\PY@bc=\relax \let\PY@ff=\relax}
+\def\PY@tok#1{\csname PY@tok@#1\endcsname}
+\def\PY@toks#1+{\ifx\relax#1\empty\else%
+    \PY@tok{#1}\expandafter\PY@toks\fi}
+\def\PY@do#1{\PY@bc{\PY@tc{\PY@ul{%
+    \PY@it{\PY@bf{\PY@ff{#1}}}}}}}
+\def\PY#1#2{\PY@reset\PY@toks#1+\relax+\PY@do{#2}}
+
+\expandafter\def\csname PY@tok@w\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.73,0.73}{##1}}}
+\expandafter\def\csname PY@tok@c\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.74,0.48,0.00}{##1}}}
+\expandafter\def\csname PY@tok@k\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kt\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.69,0.00,0.25}{##1}}}
+\expandafter\def\csname PY@tok@o\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@ow\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\expandafter\def\csname PY@tok@nb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@nc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@nn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@ne\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.82,0.25,0.23}{##1}}}
+\expandafter\def\csname PY@tok@nv\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@no\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nl\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.63,0.63,0.00}{##1}}}
+\expandafter\def\csname PY@tok@ni\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.60,0.60,0.60}{##1}}}
+\expandafter\def\csname PY@tok@na\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.49,0.56,0.16}{##1}}}
+\expandafter\def\csname PY@tok@nt\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nd\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\expandafter\def\csname PY@tok@s\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sd\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@si\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
+\expandafter\def\csname PY@tok@se\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sr\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
+\expandafter\def\csname PY@tok@ss\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@sx\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@m\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@gh\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@gu\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.50,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@gd\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.63,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@gi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.63,0.00}{##1}}}
+\expandafter\def\csname PY@tok@gr\endcsname{\def\PY@tc##1{\textcolor[rgb]{1.00,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@ge\endcsname{\let\PY@it=\textit}
+\expandafter\def\csname PY@tok@gs\endcsname{\let\PY@bf=\textbf}
+\expandafter\def\csname PY@tok@gp\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@go\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.53,0.53}{##1}}}
+\expandafter\def\csname PY@tok@gt\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.27,0.87}{##1}}}
+\expandafter\def\csname PY@tok@err\endcsname{\def\PY@bc##1{\setlength{\fboxsep}{0pt}\fcolorbox[rgb]{1.00,0.00,0.00}{1,1,1}{\strut ##1}}}
+\expandafter\def\csname PY@tok@kc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kd\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kr\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@bp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@fm\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@vc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@vg\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@vi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@vm\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@sa\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@dl\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@s2\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@s1\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@mb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@il\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mo\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@ch\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cm\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cpf\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@c1\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cs\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+
+\def\PYZbs{\char`\\}
+\def\PYZus{\char`\_}
+\def\PYZob{\char`\{}
+\def\PYZcb{\char`\}}
+\def\PYZca{\char`\^}
+\def\PYZam{\char`\&}
+\def\PYZlt{\char`\<}
+\def\PYZgt{\char`\>}
+\def\PYZsh{\char`\#}
+\def\PYZpc{\char`\%}
+\def\PYZdl{\char`\$}
+\def\PYZhy{\char`\-}
+\def\PYZsq{\char`\'}
+\def\PYZdq{\char`\"}
+\def\PYZti{\char`\~}
+% for compatibility with earlier versions
+\def\PYZat{@}
+\def\PYZlb{[}
+\def\PYZrb{]}
+\makeatother
+
+
+    % For linebreaks inside Verbatim environment from package fancyvrb. 
+    \makeatletter
+        \newbox\Wrappedcontinuationbox 
+        \newbox\Wrappedvisiblespacebox 
+        \newcommand*\Wrappedvisiblespace {\textcolor{red}{\textvisiblespace}} 
+        \newcommand*\Wrappedcontinuationsymbol {\textcolor{red}{\llap{\tiny$\m@th\hookrightarrow$}}} 
+        \newcommand*\Wrappedcontinuationindent {3ex } 
+        \newcommand*\Wrappedafterbreak {\kern\Wrappedcontinuationindent\copy\Wrappedcontinuationbox} 
+        % Take advantage of the already applied Pygments mark-up to insert 
+        % potential linebreaks for TeX processing. 
+        %        {, <, #, %, $, ' and ": go to next line. 
+        %        _, }, ^, &, >, - and ~: stay at end of broken line. 
+        % Use of \textquotesingle for straight quote. 
+        \newcommand*\Wrappedbreaksatspecials {% 
+            \def\PYGZus{\discretionary{\char`\_}{\Wrappedafterbreak}{\char`\_}}% 
+            \def\PYGZob{\discretionary{}{\Wrappedafterbreak\char`\{}{\char`\{}}% 
+            \def\PYGZcb{\discretionary{\char`\}}{\Wrappedafterbreak}{\char`\}}}% 
+            \def\PYGZca{\discretionary{\char`\^}{\Wrappedafterbreak}{\char`\^}}% 
+            \def\PYGZam{\discretionary{\char`\&}{\Wrappedafterbreak}{\char`\&}}% 
+            \def\PYGZlt{\discretionary{}{\Wrappedafterbreak\char`\<}{\char`\<}}% 
+            \def\PYGZgt{\discretionary{\char`\>}{\Wrappedafterbreak}{\char`\>}}% 
+            \def\PYGZsh{\discretionary{}{\Wrappedafterbreak\char`\#}{\char`\#}}% 
+            \def\PYGZpc{\discretionary{}{\Wrappedafterbreak\char`\%}{\char`\%}}% 
+            \def\PYGZdl{\discretionary{}{\Wrappedafterbreak\char`\$}{\char`\$}}% 
+            \def\PYGZhy{\discretionary{\char`\-}{\Wrappedafterbreak}{\char`\-}}% 
+            \def\PYGZsq{\discretionary{}{\Wrappedafterbreak\textquotesingle}{\textquotesingle}}% 
+            \def\PYGZdq{\discretionary{}{\Wrappedafterbreak\char`\"}{\char`\"}}% 
+            \def\PYGZti{\discretionary{\char`\~}{\Wrappedafterbreak}{\char`\~}}% 
+        } 
+        % Some characters . , ; ? ! / are not pygmentized. 
+        % This macro makes them "active" and they will insert potential linebreaks 
+        \newcommand*\Wrappedbreaksatpunct {% 
+            \lccode`\~`\.\lowercase{\def~}{\discretionary{\hbox{\char`\.}}{\Wrappedafterbreak}{\hbox{\char`\.}}}% 
+            \lccode`\~`\,\lowercase{\def~}{\discretionary{\hbox{\char`\,}}{\Wrappedafterbreak}{\hbox{\char`\,}}}% 
+            \lccode`\~`\;\lowercase{\def~}{\discretionary{\hbox{\char`\;}}{\Wrappedafterbreak}{\hbox{\char`\;}}}% 
+            \lccode`\~`\:\lowercase{\def~}{\discretionary{\hbox{\char`\:}}{\Wrappedafterbreak}{\hbox{\char`\:}}}% 
+            \lccode`\~`\?\lowercase{\def~}{\discretionary{\hbox{\char`\?}}{\Wrappedafterbreak}{\hbox{\char`\?}}}% 
+            \lccode`\~`\!\lowercase{\def~}{\discretionary{\hbox{\char`\!}}{\Wrappedafterbreak}{\hbox{\char`\!}}}% 
+            \lccode`\~`\/\lowercase{\def~}{\discretionary{\hbox{\char`\/}}{\Wrappedafterbreak}{\hbox{\char`\/}}}% 
+            \catcode`\.\active
+            \catcode`\,\active 
+            \catcode`\;\active
+            \catcode`\:\active
+            \catcode`\?\active
+            \catcode`\!\active
+            \catcode`\/\active 
+            \lccode`\~`\~ 	
+        }
+    \makeatother
+
+    \let\OriginalVerbatim=\Verbatim
+    \makeatletter
+    \renewcommand{\Verbatim}[1][1]{%
+        %\parskip\z@skip
+        \sbox\Wrappedcontinuationbox {\Wrappedcontinuationsymbol}%
+        \sbox\Wrappedvisiblespacebox {\FV@SetupFont\Wrappedvisiblespace}%
+        \def\FancyVerbFormatLine ##1{\hsize\linewidth
+            \vtop{\raggedright\hyphenpenalty\z@\exhyphenpenalty\z@
+                \doublehyphendemerits\z@\finalhyphendemerits\z@
+                \strut ##1\strut}%
+        }%
+        % If the linebreak is at a space, the latter will be displayed as visible
+        % space at end of first line, and a continuation symbol starts next line.
+        % Stretch/shrink are however usually zero for typewriter font.
+        \def\FV@Space {%
+            \nobreak\hskip\z@ plus\fontdimen3\font minus\fontdimen4\font
+            \discretionary{\copy\Wrappedvisiblespacebox}{\Wrappedafterbreak}
+            {\kern\fontdimen2\font}%
+        }%
+        
+        % Allow breaks at special characters using \PYG... macros.
+        \Wrappedbreaksatspecials
+        % Breaks at punctuation characters . , ; ? ! and / need catcode=\active 	
+        \OriginalVerbatim[#1,codes*=\Wrappedbreaksatpunct]%
+    }
+    \makeatother
+
+    % Exact colors from NB
+    \definecolor{incolor}{HTML}{303F9F}
+    \definecolor{outcolor}{HTML}{D84315}
+    \definecolor{cellborder}{HTML}{CFCFCF}
+    \definecolor{cellbackground}{HTML}{F7F7F7}
+    
+    % prompt
+    \makeatletter
+    \newcommand{\boxspacing}{\kern\kvtcb@left@rule\kern\kvtcb@boxsep}
+    \makeatother
+    \newcommand{\prompt}[4]{
+        {\ttfamily\llap{{\color{#2}[#3]:\hspace{3pt}#4}}\vspace{-\baselineskip}}
+    }
+    
+
+    
+    % Prevent overflowing lines due to hard-to-break entities
+    \sloppy 
+    % Setup hyperref package
+    \hypersetup{
+      breaklinks=true,  % so long urls are correctly broken across lines
+      colorlinks=true,
+      urlcolor=urlcolor,
+      linkcolor=linkcolor,
+      citecolor=citecolor,
+      }
+    % Slightly bigger margins than the latex defaults
+    
+    \geometry{verbose,tmargin=1in,bmargin=1in,lmargin=1in,rmargin=1in}
+    
+    
+
+\begin{document}
+    
+    \maketitle
+    
+    
+
+    
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{o}{\PYZpc{}}\PY{k}{load\PYZus{}ext} autoreload
+\PY{o}{\PYZpc{}}\PY{k}{autoreload} 2
+\PY{c+c1}{\PYZsh{} pull in new changes to python modules without having to restart notebook}
+
+\PY{k+kn}{import} \PY{n+nn}{matplotlib}\PY{n+nn}{.}\PY{n+nn}{pyplot} \PY{k}{as} \PY{n+nn}{plt}
+\PY{k+kn}{import} \PY{n+nn}{numpy} \PY{k}{as} \PY{n+nn}{np}
+\PY{k+kn}{import} \PY{n+nn}{pandas} \PY{k}{as} \PY{n+nn}{pd}
+\PY{k+kn}{import} \PY{n+nn}{matplotlib}\PY{n+nn}{.}\PY{n+nn}{pyplot} \PY{k}{as} \PY{n+nn}{plt}
+\PY{k+kn}{import} \PY{n+nn}{json} 
+\PY{k+kn}{from} \PY{n+nn}{jsbsim\PYZus{}utils} \PY{k+kn}{import} \PY{n}{Logger}\PY{p}{,} \PY{n}{trim}\PY{p}{,} \PY{n}{simulate}\PY{p}{,} \PY{n}{linearize}\PY{p}{,} \PY{n}{rootlocus}\PY{p}{,} \PY{n}{clean\PYZus{}tf}
+\PY{k+kn}{import} \PY{n+nn}{control} 
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{all\PYZus{}data} \PY{o}{=} \PY{n+nb}{dict}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    Nonlinear-dynamics of aircraft
 
 \[\dot{x} = f(x, u)\]
 
@@ -40,10 +427,10 @@ This is an optimization problem.
 Can simplify this problem with mixing matrices, to decouple the dynamcis
 into SISO (single-input-single output) systems.
 
-Due to Taylor series error on the order of (dx\^{}2). We know the linear
+    Due to Taylor series error on the order of (dx\^{}2). We know the linear
 model approx, does well near the equilibrium point.
 
-\(\dot{\vec{x}} = \vec{f}(x, u) = A \vec{x} + B \vec{u}\)
+    \(\dot{\vec{x}} = \vec{f}(x, u) = A \vec{x} + B \vec{u}\)
 
 \(\dot{\vec{y}} = C \vec{x} + D \vec{u}\)
 
@@ -55,1306 +442,1499 @@ model approx, does well near the equilibrium point.
 
 \(D = \dfrac{\delta \vec{y}(x0, u0)}{\delta \vec{u}}\)
 
-\hypertarget{ground-trimming}{%
-\subsection{Ground Trimming}\label{ground-trimming}}
+    \hypertarget{ground-trimming}{%
+\subsubsection{Ground Trimming}\label{ground-trimming}}
 
-\begin{lstlisting}[language=Python]
-ct = 0
-temp = []
-def cost_ground(fdm):
-    # modify cost to also penalize throttle   
-    udot = fdm['accelerations/udot-ft_sec2']
-    vdot = fdm['accelerations/vdot-ft_sec2']
-    wdot = fdm['accelerations/wdot-ft_sec2']
-    pdot = fdm['accelerations/pdot-rad_sec2']
-    qdot = fdm['accelerations/qdot-rad_sec2']
-    rdot = fdm['accelerations/rdot-rad_sec2']
-    temp.append(fdm.get_property_catalog('fbz'))
-    return udot**2 + vdot**2 + wdot**2 + pdot**2 + qdot**2 + rdot**2  
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{ct} \PY{o}{=} \PY{l+m+mi}{0}
+\PY{n}{temp} \PY{o}{=} \PY{p}{[}\PY{p}{]}
+\PY{k}{def} \PY{n+nf}{cost\PYZus{}ground}\PY{p}{(}\PY{n}{fdm}\PY{p}{)}\PY{p}{:}
+    \PY{c+c1}{\PYZsh{} modify cost to also penalize throttle   }
+    \PY{n}{udot} \PY{o}{=} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/udot\PYZhy{}ft\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+    \PY{n}{vdot} \PY{o}{=} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/vdot\PYZhy{}ft\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+    \PY{n}{wdot} \PY{o}{=} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/wdot\PYZhy{}ft\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+    \PY{n}{pdot} \PY{o}{=} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/pdot\PYZhy{}rad\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+    \PY{n}{qdot} \PY{o}{=} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/qdot\PYZhy{}rad\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+    \PY{n}{rdot} \PY{o}{=} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/rdot\PYZhy{}rad\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+    \PY{n}{temp}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n}{fdm}\PY{o}{.}\PY{n}{get\PYZus{}property\PYZus{}catalog}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fbz}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{)}
+    \PY{k}{return} \PY{n}{udot}\PY{o}{*}\PY{o}{*}\PY{l+m+mi}{2} \PY{o}{+} \PY{n}{vdot}\PY{o}{*}\PY{o}{*}\PY{l+m+mi}{2} \PY{o}{+} \PY{n}{wdot}\PY{o}{*}\PY{o}{*}\PY{l+m+mi}{2} \PY{o}{+} \PY{n}{pdot}\PY{o}{*}\PY{o}{*}\PY{l+m+mi}{2} \PY{o}{+} \PY{n}{qdot}\PY{o}{*}\PY{o}{*}\PY{l+m+mi}{2} \PY{o}{+} \PY{n}{rdot}\PY{o}{*}\PY{o}{*}\PY{l+m+mi}{2}  
         
-op_ground, props, res = trim(
-    aircraft='F-35B-2',
-    ic={
-          'ic/vt-fps': 0,
-          'ic/psi-true-deg': 280,
-          'ap/gear-enable': 1,
-          'fcs/left-brake-cmd-norm': 1,
-          'fcs/right-brake-cmd-norm': 1,
-          'fcs/center-brake-cmd-norm': 1,
-#         'ic/vt-fps': 0,
-#         'gear/gear-cmd-norm': 1,
-#         'propulsion/engine/pitch-angle-rad': np.deg2rad(0),
-#         'fcs/throttle-cmd-norm': 0,
-#         'fcs/aileron-cmd-norm': 0,
-#         'fcs/elevator-cmd-norm': 0,
-#         'fcs/rudder-cmd-norm': 0,
-#         'fcs/left-brake-cmd-norm': 1,
-#         'fcs/right-brake-cmd-norm': 1,
-#         'fcs/center-brake-cmd-norm': 1,
-    },
-    design_vector=['ic/theta-rad', 'ic/h-agl-ft'],
-    x0=[0, 0.31],
-    verbose=True,
-    method='Nelder-Mead', # works better with ground interaction
-    tol=1e-12,
-    #bounds=[[np.deg2rad(-40), np.deg2rad(40)], [0, 20]],
-    cost=cost_ground,
-)
+\PY{n}{op\PYZus{}ground}\PY{p}{,} \PY{n}{props}\PY{p}{,} \PY{n}{res} \PY{o}{=} \PY{n}{trim}\PY{p}{(}
+    \PY{n}{aircraft}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{F\PYZhy{}35B\PYZhy{}2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+    \PY{n}{ic}\PY{o}{=}\PY{p}{\PYZob{}}
+          \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/vt\PYZhy{}fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{0}\PY{p}{,}
+          \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/psi\PYZhy{}true\PYZhy{}deg}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{280}\PY{p}{,}
+          \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ap/gear\PYZhy{}enable}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{1}\PY{p}{,}
+          \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/left\PYZhy{}brake\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{1}\PY{p}{,}
+          \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/right\PYZhy{}brake\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{1}\PY{p}{,}
+          \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/center\PYZhy{}brake\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{1}\PY{p}{,}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}ic/vt\PYZhy{}fps\PYZsq{}: 0,}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}gear/gear\PYZhy{}cmd\PYZhy{}norm\PYZsq{}: 1,}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}propulsion/engine/pitch\PYZhy{}angle\PYZhy{}rad\PYZsq{}: np.deg2rad(0),}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}fcs/throttle\PYZhy{}cmd\PYZhy{}norm\PYZsq{}: 0,}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}fcs/aileron\PYZhy{}cmd\PYZhy{}norm\PYZsq{}: 0,}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}fcs/elevator\PYZhy{}cmd\PYZhy{}norm\PYZsq{}: 0,}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}fcs/rudder\PYZhy{}cmd\PYZhy{}norm\PYZsq{}: 0,}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}fcs/left\PYZhy{}brake\PYZhy{}cmd\PYZhy{}norm\PYZsq{}: 1,}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}fcs/right\PYZhy{}brake\PYZhy{}cmd\PYZhy{}norm\PYZsq{}: 1,}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}fcs/center\PYZhy{}brake\PYZhy{}cmd\PYZhy{}norm\PYZsq{}: 1,}
+    \PY{p}{\PYZcb{}}\PY{p}{,}
+    \PY{n}{design\PYZus{}vector}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/theta\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/h\PYZhy{}agl\PYZhy{}ft}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{x0}\PY{o}{=}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mf}{0.31}\PY{p}{]}\PY{p}{,}
+    \PY{n}{verbose}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,}
+    \PY{n}{method}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Nelder\PYZhy{}Mead}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{c+c1}{\PYZsh{} works better with ground interaction}
+    \PY{n}{tol}\PY{o}{=}\PY{l+m+mf}{1e\PYZhy{}12}\PY{p}{,}
+    \PY{c+c1}{\PYZsh{}bounds=[[np.deg2rad(\PYZhy{}40), np.deg2rad(40)], [0, 20]],}
+    \PY{n}{cost}\PY{o}{=}\PY{n}{cost\PYZus{}ground}\PY{p}{,}
+\PY{p}{)}
 
-print(res)
-print(op_ground)
-print(temp[0])
-print(temp[-1])
+\PY{n+nb}{print}\PY{p}{(}\PY{n}{res}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{n}{op\PYZus{}ground}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{n}{temp}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{n}{temp}\PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
 
-data = dict()
-data['res'] = res
-data['op_ground'] = op_ground
-data['fbz_initial'] = temp[0]
-data['fbz_final'] = temp[-1]
-all_data = dict()
-all_data['groundTrim'] = data
-\end{lstlisting}
+\PY{n}{data} \PY{o}{=} \PY{n+nb}{dict}\PY{p}{(}\PY{p}{)}
+\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{res}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{res}
+\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{op\PYZus{}ground}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{op\PYZus{}ground}
+\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fbz\PYZus{}initial}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{temp}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}
+\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fbz\PYZus{}final}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{temp}\PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}
+\PY{n}{all\PYZus{}data} \PY{o}{=} \PY{n+nb}{dict}\PY{p}{(}\PY{p}{)}
+\PY{n}{all\PYZus{}data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{groundTrim}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{data}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-log_ground = simulate(
-    aircraft='F-35B-2',
-    op_0=op_ground,
-    tf=5,
-    realtime=True)
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{log\PYZus{}ground} \PY{o}{=} \PY{n}{simulate}\PY{p}{(}
+    \PY{n}{aircraft}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{F\PYZhy{}35B\PYZhy{}2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+    \PY{n}{op\PYZus{}0}\PY{o}{=}\PY{n}{op\PYZus{}ground}\PY{p}{,}
+    \PY{n}{tf}\PY{o}{=}\PY{l+m+mi}{5}\PY{p}{,}
+    \PY{n}{realtime}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-log_ground['position/h-agl-ft'].plot()
-plt.grid(True)
-plt.ylabel('ft, altitude')
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{log\PYZus{}ground}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{position/h\PYZhy{}agl\PYZhy{}ft}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{grid}\PY{p}{(}\PY{k+kc}{True}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ft, altitude}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-log_ground['attitude/theta-deg'].plot()
-plt.grid(True)
-plt.ylabel('deg, aircraft pitch')
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{log\PYZus{}ground}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{attitude/theta\PYZhy{}deg}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{grid}\PY{p}{(}\PY{k+kc}{True}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{deg, aircraft pitch}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\hypertarget{hover-trimming}{%
-\subsection{Hover Trimming}\label{hover-trimming}}
+    \hypertarget{hover-trimming}{%
+\subsubsection{Hover Trimming}\label{hover-trimming}}
 
-\begin{lstlisting}[language=Python]
-op_hover, props, res = trim(
-    aircraft='F-35B-2',
-    ic={  
-          'ic/h-sl-ft': 650,
-          'ic/vt-fps': 0,
-          'ic/psi-true-deg': 0,
-          'ap/gear-enable': 1,
-#         'ic/h-agl-ft': 10,
-#         'ic/vd-fps': 0,
-#         'ic/vn-fps': 0*np.cos(np.deg2rad(280)),
-#         'ic/ve-fps': 0*np.sin(np.deg2rad(280)),
-#         'ic/theta-rad': 0,
-#         'gear/gear-cmd-norm': 1,
-#         'fcs/left-brake-cmd-norm': 0,
-#         'fcs/right-brake-cmd-norm': 0,
-#         'fcs/center-brake-cmd-norm': 0,
-    },
-    eq_constraints = [
-        lambda fdm: fdm['accelerations/udot-ft_sec2'],
-        #lambda fdm: fdm['accelerations/vdot-ft_sec2'],
-        lambda fdm: fdm['accelerations/wdot-ft_sec2'],
-        #lambda fdm: fdm['accelerations/pdot-rad_sec2'],
-        lambda fdm: fdm['accelerations/qdot-rad_sec2'],
-        #lambda fdm: fdm['accelerations/rdot-rad_sec2'],
-    ],
-    design_vector=[
-        'fcs/throttle-cmd-norm',
-        'fcs/elevator-cmd-norm',
-        'propulsion/engine/pitch-angle-rad',
-        'propulsion/engine[1]/pitch-angle-rad',
-        'propulsion/engine[2]/pitch-angle-rad',
-        'propulsion/engine[3]/pitch-angle-rad',
-    ],
-#     design_vector=[
-#         'fcs/throttle-cmd-norm',
-#         'fcs/elevator-cmd-norm',
-#         'propulsion/engine/pitch-angle-rad',
-#         'propulsion/engine[1]/pitch-angle-rad',
-#         'propulsion/engine[2]/pitch-angle-rad',
-#         'propulsion/engine[3]/pitch-angle-rad',
-#     ],
-    x0=[0.9, 0.2, np.deg2rad(90), np.deg2rad(90), np.deg2rad(90), np.deg2rad(90)],
-    cost= lambda fdm: fdm['fcs/throttle-cmd-norm'],
-    verbose=True,
-    method='SLSQP',
-    bounds=[[0, 1], [-1, 1], [np.deg2rad(0), np.deg2rad(120)], 
-           [np.deg2rad(0), np.deg2rad(120)],
-           [np.deg2rad(0), np.deg2rad(120)],
-           [np.deg2rad(0), np.deg2rad(120)]],
-    tol=1e-12
-)
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{op\PYZus{}hover}\PY{p}{,} \PY{n}{props}\PY{p}{,} \PY{n}{res} \PY{o}{=} \PY{n}{trim}\PY{p}{(}
+    \PY{n}{aircraft}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{F\PYZhy{}35B\PYZhy{}2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+    \PY{n}{ic}\PY{o}{=}\PY{p}{\PYZob{}}  
+          \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/h\PYZhy{}sl\PYZhy{}ft}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{650}\PY{p}{,}
+          \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/vt\PYZhy{}fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{0}\PY{p}{,}
+          \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/psi\PYZhy{}true\PYZhy{}deg}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{0}\PY{p}{,}
+          \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ap/gear\PYZhy{}enable}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{1}\PY{p}{,}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}ic/h\PYZhy{}agl\PYZhy{}ft\PYZsq{}: 10,}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}ic/vd\PYZhy{}fps\PYZsq{}: 0,}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}ic/vn\PYZhy{}fps\PYZsq{}: 0*np.cos(np.deg2rad(280)),}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}ic/ve\PYZhy{}fps\PYZsq{}: 0*np.sin(np.deg2rad(280)),}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}ic/theta\PYZhy{}rad\PYZsq{}: 0,}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}gear/gear\PYZhy{}cmd\PYZhy{}norm\PYZsq{}: 1,}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}fcs/left\PYZhy{}brake\PYZhy{}cmd\PYZhy{}norm\PYZsq{}: 0,}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}fcs/right\PYZhy{}brake\PYZhy{}cmd\PYZhy{}norm\PYZsq{}: 0,}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}fcs/center\PYZhy{}brake\PYZhy{}cmd\PYZhy{}norm\PYZsq{}: 0,}
+    \PY{p}{\PYZcb{}}\PY{p}{,}
+    \PY{n}{eq\PYZus{}constraints} \PY{o}{=} \PY{p}{[}
+        \PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/udot\PYZhy{}ft\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+        \PY{c+c1}{\PYZsh{}lambda fdm: fdm[\PYZsq{}accelerations/vdot\PYZhy{}ft\PYZus{}sec2\PYZsq{}],}
+        \PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/wdot\PYZhy{}ft\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+        \PY{c+c1}{\PYZsh{}lambda fdm: fdm[\PYZsq{}accelerations/pdot\PYZhy{}rad\PYZus{}sec2\PYZsq{}],}
+        \PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/qdot\PYZhy{}rad\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+        \PY{c+c1}{\PYZsh{}lambda fdm: fdm[\PYZsq{}accelerations/rdot\PYZhy{}rad\PYZus{}sec2\PYZsq{}],}
+    \PY{p}{]}\PY{p}{,}
+    \PY{n}{design\PYZus{}vector}\PY{o}{=}\PY{p}{[}
+        \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/throttle\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+        \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/elevator\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+        \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+        \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine[1]/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+        \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine[2]/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+        \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine[3]/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+    \PY{p}{]}\PY{p}{,}
+\PY{c+c1}{\PYZsh{}     design\PYZus{}vector=[}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}fcs/throttle\PYZhy{}cmd\PYZhy{}norm\PYZsq{},}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}fcs/elevator\PYZhy{}cmd\PYZhy{}norm\PYZsq{},}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}propulsion/engine/pitch\PYZhy{}angle\PYZhy{}rad\PYZsq{},}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}propulsion/engine[1]/pitch\PYZhy{}angle\PYZhy{}rad\PYZsq{},}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}propulsion/engine[2]/pitch\PYZhy{}angle\PYZhy{}rad\PYZsq{},}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}propulsion/engine[3]/pitch\PYZhy{}angle\PYZhy{}rad\PYZsq{},}
+\PY{c+c1}{\PYZsh{}     ],}
+    \PY{n}{x0}\PY{o}{=}\PY{p}{[}\PY{l+m+mf}{0.9}\PY{p}{,} \PY{l+m+mf}{0.2}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{90}\PY{p}{)}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{90}\PY{p}{)}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{90}\PY{p}{)}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{90}\PY{p}{)}\PY{p}{]}\PY{p}{,}
+    \PY{n}{cost}\PY{o}{=} \PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/throttle\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{verbose}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,}
+    \PY{n}{method}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{SLSQP}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+    \PY{n}{bounds}\PY{o}{=}\PY{p}{[}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{120}\PY{p}{)}\PY{p}{]}\PY{p}{,} 
+           \PY{p}{[}\PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{120}\PY{p}{)}\PY{p}{]}\PY{p}{,}
+           \PY{p}{[}\PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{120}\PY{p}{)}\PY{p}{]}\PY{p}{,}
+           \PY{p}{[}\PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{120}\PY{p}{)}\PY{p}{]}\PY{p}{]}\PY{p}{,}
+    \PY{n}{tol}\PY{o}{=}\PY{l+m+mf}{1e\PYZhy{}12}
+\PY{p}{)}
 
-print(op_hover)
-data1 = dict()
-data1['res'] = res
-data1['op_hover'] = op_hover
-all_data['hoverTrim'] = data1
-\end{lstlisting}
+\PY{n+nb}{print}\PY{p}{(}\PY{n}{op\PYZus{}hover}\PY{p}{)}
+\PY{n}{data1} \PY{o}{=} \PY{n+nb}{dict}\PY{p}{(}\PY{p}{)}
+\PY{n}{data1}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{res}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{res}
+\PY{n}{data1}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{op\PYZus{}hover}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{op\PYZus{}hover}
+\PY{n}{all\PYZus{}data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{hoverTrim}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{data1}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-log_hover = simulate(
-    aircraft='F-35B-2',
-    op_0=op_hover,
-    tf=10,
-    realtime=True)
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{log\PYZus{}hover} \PY{o}{=} \PY{n}{simulate}\PY{p}{(}
+    \PY{n}{aircraft}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{F\PYZhy{}35B\PYZhy{}2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+    \PY{n}{op\PYZus{}0}\PY{o}{=}\PY{n}{op\PYZus{}hover}\PY{p}{,}
+    \PY{n}{tf}\PY{o}{=}\PY{l+m+mi}{10}\PY{p}{,}
+    \PY{n}{realtime}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-log_hover['position/h-agl-ft'].plot()
-plt.grid(True)
-plt.ylabel('ft, altitude')
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{log\PYZus{}hover}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{position/h\PYZhy{}agl\PYZhy{}ft}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{grid}\PY{p}{(}\PY{k+kc}{True}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ft, altitude}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-plt.subplot()
-log_hover['propulsion/engine/thrust-lbs'].plot()
-log_hover['propulsion/engine[1]/thrust-lbs'].plot()
-log_hover['propulsion/engine[2]/thrust-lbs'].plot()
-log_hover['propulsion/engine[3]/thrust-lbs'].plot()
-plt.grid(True)
-plt.legend(['rcp', 'rhp', 'lcp', 'lhp'])
-plt.ylabel('lbs, engine thrusts')
-plt.show()
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{plt}\PY{o}{.}\PY{n}{subplot}\PY{p}{(}\PY{p}{)}
+\PY{n}{log\PYZus{}hover}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine/thrust\PYZhy{}lbs}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{log\PYZus{}hover}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine[1]/thrust\PYZhy{}lbs}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{log\PYZus{}hover}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine[2]/thrust\PYZhy{}lbs}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{log\PYZus{}hover}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine[3]/thrust\PYZhy{}lbs}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{grid}\PY{p}{(}\PY{k+kc}{True}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{rcp}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{rhp}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{lcp}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{lhp}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{lbs, engine thrusts}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-plt.subplot()
-log_hover['propulsion/engine/pitch-angle-rad'].plot()
-log_hover['propulsion/engine[1]/pitch-angle-rad'].plot()
-log_hover['propulsion/engine[2]/pitch-angle-rad'].plot()
-log_hover['propulsion/engine[3]/pitch-angle-rad'].plot()
-plt.grid(True)
-plt.legend(['rcp', 'rhp', 'lcp', 'lhp'])
-plt.ylabel('deg, engine pitch angle')
-plt.show()
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{plt}\PY{o}{.}\PY{n}{subplot}\PY{p}{(}\PY{p}{)}
+\PY{n}{log\PYZus{}hover}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{log\PYZus{}hover}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine[1]/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{log\PYZus{}hover}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine[2]/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{log\PYZus{}hover}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine[3]/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{grid}\PY{p}{(}\PY{k+kc}{True}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{rcp}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{rhp}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{lcp}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{lhp}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{deg, engine pitch angle}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\hypertarget{hover-auto-pilot}{%
-\subsection{Hover Auto Pilot}\label{hover-auto-pilot}}
+    \hypertarget{hover-auto-pilot}{%
+\subsubsection{Hover Auto Pilot}\label{hover-auto-pilot}}
 
-\begin{lstlisting}[language=Python]
-op_hover_auto = dict(op_hover)
-op_hover_auto['ic/theta-deg'] = 5
-op_hover_auto['ic/phi-deg'] = 5
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{op\PYZus{}hover\PYZus{}auto} \PY{o}{=} \PY{n+nb}{dict}\PY{p}{(}\PY{n}{op\PYZus{}hover}\PY{p}{)}
+\PY{n}{op\PYZus{}hover\PYZus{}auto}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/theta\PYZhy{}deg}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{l+m+mi}{5}
+\PY{n}{op\PYZus{}hover\PYZus{}auto}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/phi\PYZhy{}deg}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{l+m+mi}{5}
 
-op_hover_auto['ap/heading-cmd-deg'] = 0
-op_hover_auto['ap/gear-enable'] = 1
-op_hover_auto['ap/roll-enable'] = 1
-op_hover_auto['ap/pitch-enable'] = 1
-op_hover_auto['ap/yaw-enable'] = 0
-op_hover_auto['ap/h-enable'] = 1
-op_hover_auto['ap/h-sl-cmd-ft'] = 650
+\PY{n}{op\PYZus{}hover\PYZus{}auto}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ap/heading\PYZhy{}cmd\PYZhy{}deg}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{l+m+mi}{0}
+\PY{n}{op\PYZus{}hover\PYZus{}auto}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ap/gear\PYZhy{}enable}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{l+m+mi}{1}
+\PY{n}{op\PYZus{}hover\PYZus{}auto}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ap/roll\PYZhy{}enable}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{l+m+mi}{1}
+\PY{n}{op\PYZus{}hover\PYZus{}auto}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ap/pitch\PYZhy{}enable}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{l+m+mi}{1}
+\PY{n}{op\PYZus{}hover\PYZus{}auto}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ap/yaw\PYZhy{}enable}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{l+m+mi}{0}
+\PY{n}{op\PYZus{}hover\PYZus{}auto}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ap/h\PYZhy{}enable}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{l+m+mi}{1}
+\PY{n}{op\PYZus{}hover\PYZus{}auto}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ap/h\PYZhy{}sl\PYZhy{}cmd\PYZhy{}ft}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{l+m+mi}{650}
 
-log_hover_auto = simulate(
-    aircraft='F-35B-2',
-    op_0=op_hover_auto,
-    tf=20,
-    realtime=False)
-\end{lstlisting}
+\PY{n}{log\PYZus{}hover\PYZus{}auto} \PY{o}{=} \PY{n}{simulate}\PY{p}{(}
+    \PY{n}{aircraft}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{F\PYZhy{}35B\PYZhy{}2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+    \PY{n}{op\PYZus{}0}\PY{o}{=}\PY{n}{op\PYZus{}hover\PYZus{}auto}\PY{p}{,}
+    \PY{n}{tf}\PY{o}{=}\PY{l+m+mi}{20}\PY{p}{,}
+    \PY{n}{realtime}\PY{o}{=}\PY{k+kc}{False}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-log_hover_auto['fcs/throttle-pos-norm'].plot(label='0')
-log_hover_auto['fcs/throttle-pos-norm[1]'].plot(label='1')
-log_hover_auto['fcs/throttle-pos-norm[2]'].plot(label='2')
-log_hover_auto['fcs/throttle-pos-norm[3]'].plot(label='3')
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{log\PYZus{}hover\PYZus{}auto}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/throttle\PYZhy{}pos\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{0}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{log\PYZus{}hover\PYZus{}auto}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/throttle\PYZhy{}pos\PYZhy{}norm[1]}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{log\PYZus{}hover\PYZus{}auto}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/throttle\PYZhy{}pos\PYZhy{}norm[2]}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{log\PYZus{}hover\PYZus{}auto}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/throttle\PYZhy{}pos\PYZhy{}norm[3]}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{3}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
 
-plt.legend()
-\end{lstlisting}
+\PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-log_hover_auto['fcs/elevator-cmd-norm'].plot(label='0')
-log_hover_auto['fcs/aileron-cmd-norm'].plot(label='1')
-log_hover_auto['fcs/rudder-cmd-norm'].plot(label='2')
-log_hover_auto['fcs/throttle-cmd-norm'].plot(label='3')
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{log\PYZus{}hover\PYZus{}auto}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/elevator\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{0}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{log\PYZus{}hover\PYZus{}auto}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/aileron\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{log\PYZus{}hover\PYZus{}auto}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/rudder\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{log\PYZus{}hover\PYZus{}auto}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/throttle\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{3}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
 
-plt.legend()
-\end{lstlisting}
+\PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-plt.subplot()
-log_hover_auto['propulsion/engine/pitch-angle-rad'].plot()
-log_hover_auto['propulsion/engine[1]/pitch-angle-rad'].plot()
-log_hover_auto['propulsion/engine[2]/pitch-angle-rad'].plot()
-log_hover_auto['propulsion/engine[3]/pitch-angle-rad'].plot()
-plt.grid(True)
-plt.legend(['rcp', 'rhp', 'lcp', 'lhp'])
-plt.ylabel('deg, engine pitch angle')
-plt.show()
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{plt}\PY{o}{.}\PY{n}{subplot}\PY{p}{(}\PY{p}{)}
+\PY{n}{log\PYZus{}hover\PYZus{}auto}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{log\PYZus{}hover\PYZus{}auto}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine[1]/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{log\PYZus{}hover\PYZus{}auto}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine[2]/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{log\PYZus{}hover\PYZus{}auto}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine[3]/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{grid}\PY{p}{(}\PY{k+kc}{True}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{rcp}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{rhp}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{lcp}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{lhp}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{deg, engine pitch angle}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\hypertarget{cruise-trimming}{%
-\subsection{Cruise Trimming}\label{cruise-trimming}}
+    \hypertarget{cruise-trimming}{%
+\subsubsection{Cruise Trimming}\label{cruise-trimming}}
 
-\begin{lstlisting}[language=Python]
-def cost_cruise(fdm):
-    # modify cost to also penalize throttle
-    delta = fdm['propulsion/engine/pitch-angle-rad']
-    theta = fdm['attitude/theta-rad']
-    drag = fdm['forces/fwx-aero-lbs']
-    lift = fdm['forces/fwz-aero-lbs']
-    alpha = fdm['aero/alpha-rad']
-    throttle = fdm['fcs/throttle-cmd-norm']
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k}{def} \PY{n+nf}{cost\PYZus{}cruise}\PY{p}{(}\PY{n}{fdm}\PY{p}{)}\PY{p}{:}
+    \PY{c+c1}{\PYZsh{} modify cost to also penalize throttle}
+    \PY{n}{delta} \PY{o}{=} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+    \PY{n}{theta} \PY{o}{=} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{attitude/theta\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+    \PY{n}{drag} \PY{o}{=} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{forces/fwx\PYZhy{}aero\PYZhy{}lbs}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+    \PY{n}{lift} \PY{o}{=} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{forces/fwz\PYZhy{}aero\PYZhy{}lbs}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+    \PY{n}{alpha} \PY{o}{=} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{aero/alpha\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+    \PY{n}{throttle} \PY{o}{=} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/throttle\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
     
-    udot = fdm['accelerations/udot-ft_sec2']
-    vdot = fdm['accelerations/vdot-ft_sec2']
-    wdot = fdm['accelerations/wdot-ft_sec2']
-    pdot = fdm['accelerations/pdot-rad_sec2']
-    qdot = fdm['accelerations/qdot-rad_sec2']
-    rdot = fdm['accelerations/rdot-rad_sec2']
-    return udot**2 + vdot**2 + wdot**2 + pdot**2 + qdot**2 + rdot**2 - 1e-3*(lift/drag)**2 + 1e-3*(theta < 0) + 1e-1*throttle + 2e-1*delta**2 
+    \PY{n}{udot} \PY{o}{=} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/udot\PYZhy{}ft\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+    \PY{n}{vdot} \PY{o}{=} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/vdot\PYZhy{}ft\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+    \PY{n}{wdot} \PY{o}{=} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/wdot\PYZhy{}ft\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+    \PY{n}{pdot} \PY{o}{=} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/pdot\PYZhy{}rad\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+    \PY{n}{qdot} \PY{o}{=} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/qdot\PYZhy{}rad\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+    \PY{n}{rdot} \PY{o}{=} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/rdot\PYZhy{}rad\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+    \PY{k}{return} \PY{n}{udot}\PY{o}{*}\PY{o}{*}\PY{l+m+mi}{2} \PY{o}{+} \PY{n}{vdot}\PY{o}{*}\PY{o}{*}\PY{l+m+mi}{2} \PY{o}{+} \PY{n}{wdot}\PY{o}{*}\PY{o}{*}\PY{l+m+mi}{2} \PY{o}{+} \PY{n}{pdot}\PY{o}{*}\PY{o}{*}\PY{l+m+mi}{2} \PY{o}{+} \PY{n}{qdot}\PY{o}{*}\PY{o}{*}\PY{l+m+mi}{2} \PY{o}{+} \PY{n}{rdot}\PY{o}{*}\PY{o}{*}\PY{l+m+mi}{2} \PY{o}{\PYZhy{}} \PY{l+m+mf}{1e\PYZhy{}3}\PY{o}{*}\PY{p}{(}\PY{n}{lift}\PY{o}{/}\PY{n}{drag}\PY{p}{)}\PY{o}{*}\PY{o}{*}\PY{l+m+mi}{2} \PY{o}{+} \PY{l+m+mf}{1e\PYZhy{}3}\PY{o}{*}\PY{p}{(}\PY{n}{theta} \PY{o}{\PYZlt{}} \PY{l+m+mi}{0}\PY{p}{)} \PY{o}{+} \PY{l+m+mf}{1e\PYZhy{}1}\PY{o}{*}\PY{n}{throttle} \PY{o}{+} \PY{l+m+mf}{2e\PYZhy{}1}\PY{o}{*}\PY{n}{delta}\PY{o}{*}\PY{o}{*}\PY{l+m+mi}{2} 
         
 
-op_cruise, prop, res = trim(
-    aircraft='F-35B-2',
-    ic={
-        'ic/gamma-rad': 0,
-        'ic/vt-fps': 677,
-        'ic/h-agl-ft': 38*1e3,
-        'gear/gear-cmd-norm': 0,
-        'fcs/left-brake-cmd-norm': 0,
-        'fcs/right-brake-cmd-norm': 0,
-        'fcs/center-brake-cmd-norm': 0,
-        'propulsion/engine/pitch-angle-rad': 0,
-        'propulsion/engine[1]/pitch-angle-rad': 0,
-        'propulsion/engine[2]/pitch-angle-rad': 0,
-        'propulsion/engine[3]/pitch-angle-rad': 0,
-    },
-#     design_vector=[
-#         'fcs/throttle-cmd-norm',
-#         'fcs/elevator-cmd-norm',
-#         'fcs/rudder-cmd-norm',
-#         'fcs/aileron-cmd-norm',
-#         'ic/alpha-rad',
-#         'ic/beta-rad',
-#         'propulsion/engine/pitch-angle-rad',
-#     ],
-#     cost=cost_cruise,
+\PY{n}{op\PYZus{}cruise}\PY{p}{,} \PY{n}{prop}\PY{p}{,} \PY{n}{res} \PY{o}{=} \PY{n}{trim}\PY{p}{(}
+    \PY{n}{aircraft}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{F\PYZhy{}35B\PYZhy{}2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+    \PY{n}{ic}\PY{o}{=}\PY{p}{\PYZob{}}
+        \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/gamma\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{0}\PY{p}{,}
+        \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/vt\PYZhy{}fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{677}\PY{p}{,}
+        \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/h\PYZhy{}agl\PYZhy{}ft}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{38}\PY{o}{*}\PY{l+m+mf}{1e3}\PY{p}{,}
+        \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{gear/gear\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{0}\PY{p}{,}
+        \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/left\PYZhy{}brake\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{0}\PY{p}{,}
+        \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/right\PYZhy{}brake\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{0}\PY{p}{,}
+        \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/center\PYZhy{}brake\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{0}\PY{p}{,}
+        \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{0}\PY{p}{,}
+        \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine[1]/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{0}\PY{p}{,}
+        \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine[2]/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{0}\PY{p}{,}
+        \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine[3]/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{0}\PY{p}{,}
+    \PY{p}{\PYZcb{}}\PY{p}{,}
+\PY{c+c1}{\PYZsh{}     design\PYZus{}vector=[}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}fcs/throttle\PYZhy{}cmd\PYZhy{}norm\PYZsq{},}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}fcs/elevator\PYZhy{}cmd\PYZhy{}norm\PYZsq{},}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}fcs/rudder\PYZhy{}cmd\PYZhy{}norm\PYZsq{},}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}fcs/aileron\PYZhy{}cmd\PYZhy{}norm\PYZsq{},}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}ic/alpha\PYZhy{}rad\PYZsq{},}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}ic/beta\PYZhy{}rad\PYZsq{},}
+\PY{c+c1}{\PYZsh{}         \PYZsq{}propulsion/engine/pitch\PYZhy{}angle\PYZhy{}rad\PYZsq{},}
+\PY{c+c1}{\PYZsh{}     ],}
+\PY{c+c1}{\PYZsh{}     cost=cost\PYZus{}cruise,}
     
-    design_vector=[
-        'fcs/throttle-cmd-norm',
-        'fcs/elevator-cmd-norm',
-        'fcs/rudder-cmd-norm',
-        'fcs/aileron-cmd-norm',
-        'ic/alpha-rad',
-        'ic/beta-rad',
-    ],
-    method='SLSQP',
-    eq_constraints= [
-        lambda fdm: fdm['accelerations/udot-ft_sec2'],
-        lambda fdm: fdm['accelerations/vdot-ft_sec2'],
-        lambda fdm: fdm['accelerations/wdot-ft_sec2'],
-        lambda fdm: fdm['accelerations/pdot-rad_sec2'],
-        lambda fdm: fdm['accelerations/qdot-rad_sec2'],
-        lambda fdm: fdm['accelerations/rdot-rad_sec2'],
-    ],
-#     cost=lambda fdm: fdm['fcs/throttle-cmd-norm'],
-    cost=cost_cruise,
-    x0=[0.4, 0, 0, 0, 0, 0],
-    verbose=True,
-    bounds=[[0, 1], [-1, 1], [-1, 1], [-1, 1], [-1, 1], [-1, 1]],
-    tol=1e-12,
-)
-print(op_cruise)
+    \PY{n}{design\PYZus{}vector}\PY{o}{=}\PY{p}{[}
+        \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/throttle\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+        \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/elevator\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+        \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/rudder\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+        \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/aileron\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+        \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/alpha\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+        \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/beta\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+    \PY{p}{]}\PY{p}{,}
+    \PY{n}{method}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{SLSQP}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+    \PY{n}{eq\PYZus{}constraints}\PY{o}{=} \PY{p}{[}
+        \PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/udot\PYZhy{}ft\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+        \PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/vdot\PYZhy{}ft\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+        \PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/wdot\PYZhy{}ft\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+        \PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/pdot\PYZhy{}rad\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+        \PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/qdot\PYZhy{}rad\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+        \PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/rdot\PYZhy{}rad\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{p}{]}\PY{p}{,}
+\PY{c+c1}{\PYZsh{}     cost=lambda fdm: fdm[\PYZsq{}fcs/throttle\PYZhy{}cmd\PYZhy{}norm\PYZsq{}],}
+    \PY{n}{cost}\PY{o}{=}\PY{n}{cost\PYZus{}cruise}\PY{p}{,}
+    \PY{n}{x0}\PY{o}{=}\PY{p}{[}\PY{l+m+mf}{0.4}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,}
+    \PY{n}{verbose}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,}
+    \PY{n}{bounds}\PY{o}{=}\PY{p}{[}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{]}\PY{p}{,}
+    \PY{n}{tol}\PY{o}{=}\PY{l+m+mf}{1e\PYZhy{}12}\PY{p}{,}
+\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{n}{op\PYZus{}cruise}\PY{p}{)}
 
-data2 = dict()
-data2['res'] = res
-data2['op_cruise'] = op_cruise
+\PY{n}{data2} \PY{o}{=} \PY{n+nb}{dict}\PY{p}{(}\PY{p}{)}
+\PY{n}{data2}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{res}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{res}
+\PY{n}{data2}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{op\PYZus{}cruise}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{op\PYZus{}cruise}
 
-all_data['cruiseTrim'] = data2
-\end{lstlisting}
+\PY{n}{all\PYZus{}data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{cruiseTrim}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{data2}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-log_cruise = simulate(
-    aircraft='F-35B-2',
-    op_0=op_cruise,
-    tf=10,
-    realtime=True)
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{log\PYZus{}cruise} \PY{o}{=} \PY{n}{simulate}\PY{p}{(}
+    \PY{n}{aircraft}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{F\PYZhy{}35B\PYZhy{}2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+    \PY{n}{op\PYZus{}0}\PY{o}{=}\PY{n}{op\PYZus{}cruise}\PY{p}{,}
+    \PY{n}{tf}\PY{o}{=}\PY{l+m+mi}{10}\PY{p}{,}
+    \PY{n}{realtime}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-plt.subplot()
-log_cruise['propulsion/engine/pitch-angle-rad'].plot()
-log_cruise['propulsion/engine[1]/pitch-angle-rad'].plot()
-log_cruise['propulsion/engine[2]/pitch-angle-rad'].plot()
-log_cruise['propulsion/engine[3]/pitch-angle-rad'].plot()
-plt.grid(True)
-plt.legend(['rcp', 'rhp', 'lcp', 'lhp'])
-plt.ylabel('lb, pounds')
-plt.show()
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{plt}\PY{o}{.}\PY{n}{subplot}\PY{p}{(}\PY{p}{)}
+\PY{n}{log\PYZus{}cruise}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{log\PYZus{}cruise}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine[1]/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{log\PYZus{}cruise}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine[2]/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{log\PYZus{}cruise}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine[3]/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{grid}\PY{p}{(}\PY{k+kc}{True}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{rcp}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{rhp}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{lcp}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{lhp}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{lb, pounds}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-log_cruise['forces/fwx-aero-lbs'].plot()
-plt.ylabel('lbs, drag')
-plt.grid(True)
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{log\PYZus{}cruise}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{forces/fwx\PYZhy{}aero\PYZhy{}lbs}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{lbs, drag}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{grid}\PY{p}{(}\PY{k+kc}{True}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-log_cruise['forces/fwy-aero-lbs'].plot()
-plt.grid(True)
-plt.ylabel('lbs, side-force')
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{log\PYZus{}cruise}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{forces/fwy\PYZhy{}aero\PYZhy{}lbs}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{grid}\PY{p}{(}\PY{k+kc}{True}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{lbs, side\PYZhy{}force}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-log_cruise['forces/fwz-aero-lbs'].plot()
-plt.grid(True)
-plt.ylabel('lbs, lift')
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{log\PYZus{}cruise}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{forces/fwz\PYZhy{}aero\PYZhy{}lbs}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{grid}\PY{p}{(}\PY{k+kc}{True}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{lbs, lift}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-log_cruise['aero/alpha-deg'].plot()
-plt.ylabel('deg, angle of attack')
-plt.grid(True)
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{log\PYZus{}cruise}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{aero/alpha\PYZhy{}deg}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{deg, angle of attack}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{grid}\PY{p}{(}\PY{k+kc}{True}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-log_cruise['fcs/elevator-pos-deg'].plot()
-plt.grid(True)
-plt.ylabel('deg, elevator angle')
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{log\PYZus{}cruise}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/elevator\PYZhy{}pos\PYZhy{}deg}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{grid}\PY{p}{(}\PY{k+kc}{True}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{deg, elevator angle}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-plt.subplot()
-log_cruise['fcs/left-aileron-pos-deg'].plot()
-log_cruise['fcs/right-aileron-pos-deg'].plot()
-plt.grid(True)
-plt.legend(['left aileron', 'right aileron'])
-plt.ylabel("deg, aileron angle")
-plt.show()
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{plt}\PY{o}{.}\PY{n}{subplot}\PY{p}{(}\PY{p}{)}
+\PY{n}{log\PYZus{}cruise}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/left\PYZhy{}aileron\PYZhy{}pos\PYZhy{}deg}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{log\PYZus{}cruise}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/right\PYZhy{}aileron\PYZhy{}pos\PYZhy{}deg}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{grid}\PY{p}{(}\PY{k+kc}{True}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{left aileron}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{right aileron}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{deg, aileron angle}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-log_cruise['fcs/rudder-pos-deg'].plot()
-plt.grid(True)
-plt.ylabel('deg, rudder angle')
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{log\PYZus{}cruise}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/rudder\PYZhy{}pos\PYZhy{}deg}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{grid}\PY{p}{(}\PY{k+kc}{True}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{deg, rudder angle}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-log_cruise['velocities/vt-fps'].plot()
-plt.grid(True)
-plt.ylabel("fps, velocity")
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{log\PYZus{}cruise}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{velocities/vt\PYZhy{}fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{grid}\PY{p}{(}\PY{k+kc}{True}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{fps, velocity}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-del all_data['cruiseTrim']['res']['hess_inv']
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k}{del} \PY{n}{all\PYZus{}data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{cruiseTrim}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{res}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{hess\PYZus{}inv}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-del all_data['hoverTrim']['res']['hess_inv']
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k}{del} \PY{n}{all\PYZus{}data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{hoverTrim}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{res}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{hess\PYZus{}inv}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-del all_data['cruiseTrim']['res']['message']
-del all_data['groundTrim']['res']['message']
-del all_data['hoverTrim']['res']['message']
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k}{del} \PY{n}{all\PYZus{}data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{cruiseTrim}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{res}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{message}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+\PY{k}{del} \PY{n}{all\PYZus{}data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{groundTrim}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{res}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{message}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+\PY{k}{del} \PY{n}{all\PYZus{}data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{hoverTrim}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{res}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{message}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-# encode numpy array for JSON serializable
-class NumpyEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, np.ndarray):
-            return obj.tolist()
-        return json.JSONEncoder.default(self, obj)
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} encode numpy array for JSON serializable}
+\PY{k}{class} \PY{n+nc}{NumpyEncoder}\PY{p}{(}\PY{n}{json}\PY{o}{.}\PY{n}{JSONEncoder}\PY{p}{)}\PY{p}{:}
+    \PY{k}{def} \PY{n+nf}{default}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{obj}\PY{p}{)}\PY{p}{:}
+        \PY{k}{if} \PY{n+nb}{isinstance}\PY{p}{(}\PY{n}{obj}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{ndarray}\PY{p}{)}\PY{p}{:}
+            \PY{k}{return} \PY{n}{obj}\PY{o}{.}\PY{n}{tolist}\PY{p}{(}\PY{p}{)}
+        \PY{k}{return} \PY{n}{json}\PY{o}{.}\PY{n}{JSONEncoder}\PY{o}{.}\PY{n}{default}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{obj}\PY{p}{)}
 
-# save all output as JSON file 
-with open('jsbsim_opt.json', '+w') as jfile:
-    json.dump(all_data, jfile, indent=4, cls=NumpyEncoder)
-\end{lstlisting}
+\PY{c+c1}{\PYZsh{} save all output as JSON file }
+\PY{k}{with} \PY{n+nb}{open}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{jsbsim\PYZus{}opt.json}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{+w}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)} \PY{k}{as} \PY{n}{jfile}\PY{p}{:}
+    \PY{n}{json}\PY{o}{.}\PY{n}{dump}\PY{p}{(}\PY{n}{all\PYZus{}data}\PY{p}{,} \PY{n}{jfile}\PY{p}{,} \PY{n}{indent}\PY{o}{=}\PY{l+m+mi}{4}\PY{p}{,} \PY{n+nb+bp}{cls}\PY{o}{=}\PY{n}{NumpyEncoder}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-result = log_cruise.to_json(orient="split")
-parsed = json.loads(result)
-with open('log_cruise.json', 'w') as jfile: 
-    json.dump(parsed, jfile, indent=4)
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{result} \PY{o}{=} \PY{n}{log\PYZus{}cruise}\PY{o}{.}\PY{n}{to\PYZus{}json}\PY{p}{(}\PY{n}{orient}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{split}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+\PY{n}{parsed} \PY{o}{=} \PY{n}{json}\PY{o}{.}\PY{n}{loads}\PY{p}{(}\PY{n}{result}\PY{p}{)}
+\PY{k}{with} \PY{n+nb}{open}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{log\PYZus{}cruise.json}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{w}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)} \PY{k}{as} \PY{n}{jfile}\PY{p}{:} 
+    \PY{n}{json}\PY{o}{.}\PY{n}{dump}\PY{p}{(}\PY{n}{parsed}\PY{p}{,} \PY{n}{jfile}\PY{p}{,} \PY{n}{indent}\PY{o}{=}\PY{l+m+mi}{4}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-result = log_ground.to_json(orient="split")
-parsed = json.loads(result)
-with open('log_ground.json', 'w') as jfile: 
-    json.dump(parsed, jfile, indent=4)
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{result} \PY{o}{=} \PY{n}{log\PYZus{}ground}\PY{o}{.}\PY{n}{to\PYZus{}json}\PY{p}{(}\PY{n}{orient}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{split}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+\PY{n}{parsed} \PY{o}{=} \PY{n}{json}\PY{o}{.}\PY{n}{loads}\PY{p}{(}\PY{n}{result}\PY{p}{)}
+\PY{k}{with} \PY{n+nb}{open}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{log\PYZus{}ground.json}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{w}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)} \PY{k}{as} \PY{n}{jfile}\PY{p}{:} 
+    \PY{n}{json}\PY{o}{.}\PY{n}{dump}\PY{p}{(}\PY{n}{parsed}\PY{p}{,} \PY{n}{jfile}\PY{p}{,} \PY{n}{indent}\PY{o}{=}\PY{l+m+mi}{4}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-result = log_hover.to_json(orient="split")
-parsed = json.loads(result)
-with open('log_hover.json', 'w') as jfile: 
-    json.dump(parsed, jfile, indent=4)
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{result} \PY{o}{=} \PY{n}{log\PYZus{}hover}\PY{o}{.}\PY{n}{to\PYZus{}json}\PY{p}{(}\PY{n}{orient}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{split}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+\PY{n}{parsed} \PY{o}{=} \PY{n}{json}\PY{o}{.}\PY{n}{loads}\PY{p}{(}\PY{n}{result}\PY{p}{)}
+\PY{k}{with} \PY{n+nb}{open}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{log\PYZus{}hover.json}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{w}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)} \PY{k}{as} \PY{n}{jfile}\PY{p}{:} 
+    \PY{n}{json}\PY{o}{.}\PY{n}{dump}\PY{p}{(}\PY{n}{parsed}\PY{p}{,} \PY{n}{jfile}\PY{p}{,} \PY{n}{indent}\PY{o}{=}\PY{l+m+mi}{4}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\hypertarget{transition}{%
+    \hypertarget{transition}{%
 \subsection{Transition}\label{transition}}
 
-\begin{lstlisting}[language=Python]
-def trim_transition(vt_fps, gamma_deg, accel_g):
-    print('trimming @ Vt=', vt_fps, 'fps', 'gamma = ', gamma_deg, 'deg')
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k}{def} \PY{n+nf}{trim\PYZus{}transition}\PY{p}{(}\PY{n}{vt\PYZus{}fps}\PY{p}{,} \PY{n}{gamma\PYZus{}deg}\PY{p}{,} \PY{n}{accel\PYZus{}g}\PY{p}{)}\PY{p}{:}
+    \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{trimming @ Vt=}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{vt\PYZus{}fps}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{gamma = }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{gamma\PYZus{}deg}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{deg}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
     
-    def accel_gamma(fdm, accel_g, gamma_deg):
-        gamma = np.deg2rad(gamma_deg)
-        g = 32.2
-        theta = fdm['attitude/theta-rad']
-        C_nb = np.array([
-            [np.cos(theta), -np.sin(theta)],
-            [np.sin(theta), np.cos(theta)]
-        ])
-        a_n = accel_g*g*np.array([np.cos(gamma), np.sin(gamma)])
-        a_b = C_nb.T.dot(a_n)
-        return a_b
+    \PY{k}{def} \PY{n+nf}{accel\PYZus{}gamma}\PY{p}{(}\PY{n}{fdm}\PY{p}{,} \PY{n}{accel\PYZus{}g}\PY{p}{,} \PY{n}{gamma\PYZus{}deg}\PY{p}{)}\PY{p}{:}
+        \PY{n}{gamma} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{n}{gamma\PYZus{}deg}\PY{p}{)}
+        \PY{n}{g} \PY{o}{=} \PY{l+m+mf}{32.2}
+        \PY{n}{theta} \PY{o}{=} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{attitude/theta\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+        \PY{n}{C\PYZus{}nb} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}
+            \PY{p}{[}\PY{n}{np}\PY{o}{.}\PY{n}{cos}\PY{p}{(}\PY{n}{theta}\PY{p}{)}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{n}{np}\PY{o}{.}\PY{n}{sin}\PY{p}{(}\PY{n}{theta}\PY{p}{)}\PY{p}{]}\PY{p}{,}
+            \PY{p}{[}\PY{n}{np}\PY{o}{.}\PY{n}{sin}\PY{p}{(}\PY{n}{theta}\PY{p}{)}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{cos}\PY{p}{(}\PY{n}{theta}\PY{p}{)}\PY{p}{]}
+        \PY{p}{]}\PY{p}{)}
+        \PY{n}{a\PYZus{}n} \PY{o}{=} \PY{n}{accel\PYZus{}g}\PY{o}{*}\PY{n}{g}\PY{o}{*}\PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{n}{np}\PY{o}{.}\PY{n}{cos}\PY{p}{(}\PY{n}{gamma}\PY{p}{)}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{sin}\PY{p}{(}\PY{n}{gamma}\PY{p}{)}\PY{p}{]}\PY{p}{)}
+        \PY{n}{a\PYZus{}b} \PY{o}{=} \PY{n}{C\PYZus{}nb}\PY{o}{.}\PY{n}{T}\PY{o}{.}\PY{n}{dot}\PY{p}{(}\PY{n}{a\PYZus{}n}\PY{p}{)}
+        \PY{k}{return} \PY{n}{a\PYZus{}b}
     
-    if vt_fps < 250:
-        x0 = [0.9, 0, 0, 0, np.deg2rad(90), 
-                            np.deg2rad(90),
-                            np.deg2rad(90),
-                            np.deg2rad(90),
-              np.deg2rad(0), 0],
-    elif vt_fps < 260:
-        x0 = [0.9, 0, 0, 0, np.deg2rad(90), 
-                            np.deg2rad(80),
-                            np.deg2rad(90),
-                            np.deg2rad(80),
-              np.deg2rad(0), 0],
-    elif vt_fps < 270:
-        x0 = [0.9, 0, 0, 0, np.deg2rad(80), 
-                            np.deg2rad(60),
-                            np.deg2rad(80),
-                            np.deg2rad(60),
-              np.deg2rad(0), 0],
-    elif vt_fps < 280:
-        x0 = [0.9, 0, 0, 0, np.deg2rad(60), 
-                            np.deg2rad(45),
-                            np.deg2rad(60),
-                            np.deg2rad(45),
-              np.deg2rad(0), 0],
-    elif vt_fps < 285:
-        x0 = [0.9, 0, 0, 0, np.deg2rad(40), 
-                            np.deg2rad(20),
-                            np.deg2rad(40),
-                            np.deg2rad(20),
-              np.deg2rad(0), 0],
-    elif vt_fps < 290:
-        x0 = [0.9, 0, 0, 0, np.deg2rad(15), 
-                            np.deg2rad(5),
-                            np.deg2rad(15),
-                            np.deg2rad(5),
-              np.deg2rad(0), 0],
-    elif vt_fps < 300:
-        x0 = [0.9, 0, 0, 0, np.deg2rad(3), 
-                            np.deg2rad(3),
-                            np.deg2rad(3),
-                            np.deg2rad(3),
-              np.deg2rad(0), 0],
-    else:
-        x0 = [0.9, 0, 0, 0, np.deg2rad(0),
-                            np.deg2rad(0),
-                            np.deg2rad(0),
-                            np.deg2rad(0),
-              np.deg2rad(0), 0],
+    \PY{k}{if} \PY{n}{vt\PYZus{}fps} \PY{o}{\PYZlt{}} \PY{l+m+mi}{250}\PY{p}{:}
+        \PY{n}{x0} \PY{o}{=} \PY{p}{[}\PY{l+m+mf}{0.9}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{90}\PY{p}{)}\PY{p}{,} 
+                            \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{90}\PY{p}{)}\PY{p}{,}
+                            \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{90}\PY{p}{)}\PY{p}{,}
+                            \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{90}\PY{p}{)}\PY{p}{,}
+              \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,}
+    \PY{k}{elif} \PY{n}{vt\PYZus{}fps} \PY{o}{\PYZlt{}} \PY{l+m+mi}{260}\PY{p}{:}
+        \PY{n}{x0} \PY{o}{=} \PY{p}{[}\PY{l+m+mf}{0.9}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{90}\PY{p}{)}\PY{p}{,} 
+                            \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{80}\PY{p}{)}\PY{p}{,}
+                            \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{90}\PY{p}{)}\PY{p}{,}
+                            \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{80}\PY{p}{)}\PY{p}{,}
+              \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,}
+    \PY{k}{elif} \PY{n}{vt\PYZus{}fps} \PY{o}{\PYZlt{}} \PY{l+m+mi}{270}\PY{p}{:}
+        \PY{n}{x0} \PY{o}{=} \PY{p}{[}\PY{l+m+mf}{0.9}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{80}\PY{p}{)}\PY{p}{,} 
+                            \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{60}\PY{p}{)}\PY{p}{,}
+                            \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{80}\PY{p}{)}\PY{p}{,}
+                            \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{60}\PY{p}{)}\PY{p}{,}
+              \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,}
+    \PY{k}{elif} \PY{n}{vt\PYZus{}fps} \PY{o}{\PYZlt{}} \PY{l+m+mi}{280}\PY{p}{:}
+        \PY{n}{x0} \PY{o}{=} \PY{p}{[}\PY{l+m+mf}{0.9}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{60}\PY{p}{)}\PY{p}{,} 
+                            \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{45}\PY{p}{)}\PY{p}{,}
+                            \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{60}\PY{p}{)}\PY{p}{,}
+                            \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{45}\PY{p}{)}\PY{p}{,}
+              \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,}
+    \PY{k}{elif} \PY{n}{vt\PYZus{}fps} \PY{o}{\PYZlt{}} \PY{l+m+mi}{285}\PY{p}{:}
+        \PY{n}{x0} \PY{o}{=} \PY{p}{[}\PY{l+m+mf}{0.9}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{40}\PY{p}{)}\PY{p}{,} 
+                            \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{20}\PY{p}{)}\PY{p}{,}
+                            \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{40}\PY{p}{)}\PY{p}{,}
+                            \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{20}\PY{p}{)}\PY{p}{,}
+              \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,}
+    \PY{k}{elif} \PY{n}{vt\PYZus{}fps} \PY{o}{\PYZlt{}} \PY{l+m+mi}{290}\PY{p}{:}
+        \PY{n}{x0} \PY{o}{=} \PY{p}{[}\PY{l+m+mf}{0.9}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{15}\PY{p}{)}\PY{p}{,} 
+                            \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{5}\PY{p}{)}\PY{p}{,}
+                            \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{15}\PY{p}{)}\PY{p}{,}
+                            \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{5}\PY{p}{)}\PY{p}{,}
+              \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,}
+    \PY{k}{elif} \PY{n}{vt\PYZus{}fps} \PY{o}{\PYZlt{}} \PY{l+m+mi}{300}\PY{p}{:}
+        \PY{n}{x0} \PY{o}{=} \PY{p}{[}\PY{l+m+mf}{0.9}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{3}\PY{p}{)}\PY{p}{,} 
+                            \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{3}\PY{p}{)}\PY{p}{,}
+                            \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{3}\PY{p}{)}\PY{p}{,}
+                            \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{3}\PY{p}{)}\PY{p}{,}
+              \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,}
+    \PY{k}{else}\PY{p}{:}
+        \PY{n}{x0} \PY{o}{=} \PY{p}{[}\PY{l+m+mf}{0.9}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{,}
+                            \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{,}
+                            \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{,}
+                            \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{,}
+              \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,}
 
-    op, props, res = trim(
-        aircraft='F-35B-2',
-        ic={
-            'ic/h-sl-ft': 800,
-            'ic/vt-fps': vt_fps,
-            'ic/gamma-deg': gamma_deg,
-            'ap/gear-enable': 1,
-        },
-        design_vector=[
-            'fcs/throttle-cmd-norm',
-            'fcs/elevator-cmd-norm',
-            'fcs/rudder-cmd-norm',
-            'fcs/aileron-cmd-norm',
-            'propulsion/engine/pitch-angle-rad',
-            'propulsion/engine[1]/pitch-angle-rad',
-            'propulsion/engine[2]/pitch-angle-rad',
-            'propulsion/engine[3]/pitch-angle-rad',
-            'ic/alpha-rad',
-            'ic/beta-rad',
-        ],
-        x0=x0,
-        verbose=False,
-        method='SLSQP',
-        eq_constraints= [
-            lambda fdm: fdm['accelerations/udot-ft_sec2'] - accel_gamma(fdm, accel_g, gamma_deg)[0],
-            lambda fdm: fdm['accelerations/vdot-ft_sec2'],
-            lambda fdm: fdm['accelerations/wdot-ft_sec2'] - accel_gamma(fdm, accel_g, gamma_deg)[1],
-            lambda fdm: fdm['accelerations/pdot-rad_sec2'],
-            lambda fdm: fdm['accelerations/qdot-rad_sec2'],
-            lambda fdm: fdm['accelerations/rdot-rad_sec2'],
-        ],
-        cost=lambda fdm: fdm['fcs/throttle-cmd-norm'],
-        bounds=[[0, 1], [-1, 1], [-1, 1], [-1, 1],
-                [np.deg2rad(0), np.deg2rad(120)],
-                [np.deg2rad(0), np.deg2rad(120)],
-                [np.deg2rad(0), np.deg2rad(120)],
-                [np.deg2rad(0), np.deg2rad(120)],
-                [-0.1, 0.1], [-0.1, 0.1]],
-        tol=1e-12)
-    return op
+    \PY{n}{op}\PY{p}{,} \PY{n}{props}\PY{p}{,} \PY{n}{res} \PY{o}{=} \PY{n}{trim}\PY{p}{(}
+        \PY{n}{aircraft}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{F\PYZhy{}35B\PYZhy{}2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+        \PY{n}{ic}\PY{o}{=}\PY{p}{\PYZob{}}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/h\PYZhy{}sl\PYZhy{}ft}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{800}\PY{p}{,}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/vt\PYZhy{}fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n}{vt\PYZus{}fps}\PY{p}{,}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/gamma\PYZhy{}deg}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n}{gamma\PYZus{}deg}\PY{p}{,}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ap/gear\PYZhy{}enable}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{1}\PY{p}{,}
+        \PY{p}{\PYZcb{}}\PY{p}{,}
+        \PY{n}{design\PYZus{}vector}\PY{o}{=}\PY{p}{[}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/throttle\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/elevator\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/rudder\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/aileron\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine[1]/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine[2]/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine[3]/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/alpha\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/beta\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+        \PY{p}{]}\PY{p}{,}
+        \PY{n}{x0}\PY{o}{=}\PY{n}{x0}\PY{p}{,}
+        \PY{n}{verbose}\PY{o}{=}\PY{k+kc}{False}\PY{p}{,}
+        \PY{n}{method}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{SLSQP}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+        \PY{n}{eq\PYZus{}constraints}\PY{o}{=} \PY{p}{[}
+            \PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/udot\PYZhy{}ft\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{\PYZhy{}} \PY{n}{accel\PYZus{}gamma}\PY{p}{(}\PY{n}{fdm}\PY{p}{,} \PY{n}{accel\PYZus{}g}\PY{p}{,} \PY{n}{gamma\PYZus{}deg}\PY{p}{)}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,}
+            \PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/vdot\PYZhy{}ft\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+            \PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/wdot\PYZhy{}ft\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{\PYZhy{}} \PY{n}{accel\PYZus{}gamma}\PY{p}{(}\PY{n}{fdm}\PY{p}{,} \PY{n}{accel\PYZus{}g}\PY{p}{,} \PY{n}{gamma\PYZus{}deg}\PY{p}{)}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,}
+            \PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/pdot\PYZhy{}rad\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+            \PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/qdot\PYZhy{}rad\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+            \PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/rdot\PYZhy{}rad\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+        \PY{p}{]}\PY{p}{,}
+        \PY{n}{cost}\PY{o}{=}\PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/throttle\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+        \PY{n}{bounds}\PY{o}{=}\PY{p}{[}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,}
+                \PY{p}{[}\PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{120}\PY{p}{)}\PY{p}{]}\PY{p}{,}
+                \PY{p}{[}\PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{120}\PY{p}{)}\PY{p}{]}\PY{p}{,}
+                \PY{p}{[}\PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{120}\PY{p}{)}\PY{p}{]}\PY{p}{,}
+                \PY{p}{[}\PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{l+m+mi}{120}\PY{p}{)}\PY{p}{]}\PY{p}{,}
+                \PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mf}{0.1}\PY{p}{,} \PY{l+m+mf}{0.1}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mf}{0.1}\PY{p}{,} \PY{l+m+mf}{0.1}\PY{p}{]}\PY{p}{]}\PY{p}{,}
+        \PY{n}{tol}\PY{o}{=}\PY{l+m+mf}{1e\PYZhy{}12}\PY{p}{)}
+    \PY{k}{return} \PY{n}{op}
 
-ops_trim = [trim_transition(vt_fps=vt, gamma_deg=0, accel_g=0)
-                  for vt in [10, 50, 100, 150, 200, 250, 300, 400, 500, 600, 700, 790]]
-for op in ops_trim:
-    print('\nvt fps', op['ic/vt-fps'])
-    print('theta deg', op['ic/gamma-deg'] + np.rad2deg(op['ic/alpha-rad']))
-    print('elevator', op['fcs/elevator-cmd-norm'])
-    print('aileron', op['fcs/aileron-cmd-norm'])
-    print('rudder', op['fcs/rudder-cmd-norm'])
-    print('throttle', op['fcs/throttle-cmd-norm'])
-\end{lstlisting}
+\PY{n}{ops\PYZus{}trim} \PY{o}{=} \PY{p}{[}\PY{n}{trim\PYZus{}transition}\PY{p}{(}\PY{n}{vt\PYZus{}fps}\PY{o}{=}\PY{n}{vt}\PY{p}{,} \PY{n}{gamma\PYZus{}deg}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{,} \PY{n}{accel\PYZus{}g}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
+                  \PY{k}{for} \PY{n}{vt} \PY{o+ow}{in} \PY{p}{[}\PY{l+m+mi}{10}\PY{p}{,} \PY{l+m+mi}{50}\PY{p}{,} \PY{l+m+mi}{100}\PY{p}{,} \PY{l+m+mi}{150}\PY{p}{,} \PY{l+m+mi}{200}\PY{p}{,} \PY{l+m+mi}{250}\PY{p}{,} \PY{l+m+mi}{300}\PY{p}{,} \PY{l+m+mi}{400}\PY{p}{,} \PY{l+m+mi}{500}\PY{p}{,} \PY{l+m+mi}{600}\PY{p}{,} \PY{l+m+mi}{700}\PY{p}{,} \PY{l+m+mi}{790}\PY{p}{]}\PY{p}{]}
+\PY{k}{for} \PY{n}{op} \PY{o+ow}{in} \PY{n}{ops\PYZus{}trim}\PY{p}{:}
+    \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s1}{vt fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{op}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/vt\PYZhy{}fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+    \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{theta deg}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{op}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/gamma\PYZhy{}deg}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{+} \PY{n}{np}\PY{o}{.}\PY{n}{rad2deg}\PY{p}{(}\PY{n}{op}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/alpha\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}\PY{p}{)}
+    \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{elevator}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{op}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/elevator\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+    \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{aileron}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{op}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/aileron\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+    \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{rudder}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{op}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/rudder\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+    \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{throttle}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{op}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/throttle\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-ops_transition = [trim_transition(vt_fps=vt, gamma_deg=10, accel_g=0.1)
-                  for vt in [10, 50, 100, 150, 200, 250, 300, 400, 500, 600, 650]]
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{ops\PYZus{}transition} \PY{o}{=} \PY{p}{[}\PY{n}{trim\PYZus{}transition}\PY{p}{(}\PY{n}{vt\PYZus{}fps}\PY{o}{=}\PY{n}{vt}\PY{p}{,} \PY{n}{gamma\PYZus{}deg}\PY{o}{=}\PY{l+m+mi}{10}\PY{p}{,} \PY{n}{accel\PYZus{}g}\PY{o}{=}\PY{l+m+mf}{0.1}\PY{p}{)}
+                  \PY{k}{for} \PY{n}{vt} \PY{o+ow}{in} \PY{p}{[}\PY{l+m+mi}{10}\PY{p}{,} \PY{l+m+mi}{50}\PY{p}{,} \PY{l+m+mi}{100}\PY{p}{,} \PY{l+m+mi}{150}\PY{p}{,} \PY{l+m+mi}{200}\PY{p}{,} \PY{l+m+mi}{250}\PY{p}{,} \PY{l+m+mi}{300}\PY{p}{,} \PY{l+m+mi}{400}\PY{p}{,} \PY{l+m+mi}{500}\PY{p}{,} \PY{l+m+mi}{600}\PY{p}{,} \PY{l+m+mi}{650}\PY{p}{]}\PY{p}{]}
 
-ops_transition_auto = []
-for op in ops_transition:
-    op = dict(op)
-    print('\nvt fps', op['ic/vt-fps'])
-    print('theta deg', op['ic/gamma-deg'] + np.rad2deg(op['ic/alpha-rad']))
-    print('elevator', op['fcs/elevator-cmd-norm'])
-    print('aileron', op['fcs/aileron-cmd-norm'])
-    print('rudder', op['fcs/rudder-cmd-norm'])
-    print('throttle', op['fcs/throttle-cmd-norm'])
-    op['ap/roll-enable'] = 1
-    op['ap/pitch-enable'] = 1
-    op['ap/yaw-enable'] = 1
-    op['ap/h-enable'] = 
-    op['ap/h-sl-cmd-ft'] = 1000
-    ops_transition_auto.append(op)
-\end{lstlisting}
+\PY{n}{ops\PYZus{}transition\PYZus{}auto} \PY{o}{=} \PY{p}{[}\PY{p}{]}
+\PY{k}{for} \PY{n}{op} \PY{o+ow}{in} \PY{n}{ops\PYZus{}transition}\PY{p}{:}
+    \PY{n}{op} \PY{o}{=} \PY{n+nb}{dict}\PY{p}{(}\PY{n}{op}\PY{p}{)}
+    \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s1}{vt fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{op}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/vt\PYZhy{}fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+    \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{theta deg}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{op}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/gamma\PYZhy{}deg}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{+} \PY{n}{np}\PY{o}{.}\PY{n}{rad2deg}\PY{p}{(}\PY{n}{op}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/alpha\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}\PY{p}{)}
+    \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{elevator}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{op}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/elevator\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+    \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{aileron}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{op}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/aileron\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+    \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{rudder}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{op}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/rudder\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+    \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{throttle}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{op}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/throttle\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+    \PY{n}{op}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ap/roll\PYZhy{}enable}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{l+m+mi}{1}
+    \PY{n}{op}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ap/pitch\PYZhy{}enable}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{l+m+mi}{1}
+    \PY{n}{op}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ap/yaw\PYZhy{}enable}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{l+m+mi}{1}
+    \PY{n}{op}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ap/h\PYZhy{}enable}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} 
+    \PY{n}{op}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ap/h\PYZhy{}sl\PYZhy{}cmd\PYZhy{}ft}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{l+m+mi}{1000}
+    \PY{n}{ops\PYZus{}transition\PYZus{}auto}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n}{op}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-log_transition_auto = []
-for op in ops_transition_auto:
-    log = simulate(
-        aircraft='F-35B-2',
-        op_0=op,
-        tf=10,
-        realtime=False)
-    log_transition_auto.append(log)
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{log\PYZus{}transition\PYZus{}auto} \PY{o}{=} \PY{p}{[}\PY{p}{]}
+\PY{k}{for} \PY{n}{op} \PY{o+ow}{in} \PY{n}{ops\PYZus{}transition\PYZus{}auto}\PY{p}{:}
+    \PY{n}{log} \PY{o}{=} \PY{n}{simulate}\PY{p}{(}
+        \PY{n}{aircraft}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{F\PYZhy{}35B\PYZhy{}2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+        \PY{n}{op\PYZus{}0}\PY{o}{=}\PY{n}{op}\PY{p}{,}
+        \PY{n}{tf}\PY{o}{=}\PY{l+m+mi}{10}\PY{p}{,}
+        \PY{n}{realtime}\PY{o}{=}\PY{k+kc}{False}\PY{p}{)}
+    \PY{n}{log\PYZus{}transition\PYZus{}auto}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n}{log}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\hypertarget{auto-takeoff}{%
+    \hypertarget{auto-takeoff}{%
 \subsection{Auto takeoff}\label{auto-takeoff}}
 
-\begin{lstlisting}[language=Python]
-log_takeoff_auto = simulate(
-    aircraft='F-35B-2',
-    op_0=op_ground,
-    op_list=[('hover', op_hover_auto, lambda fdm: fdm.get_sim_time() > 1),
-             ('10 fps', ops_transition_auto[0], lambda fdm: fdm.get_sim_time() > 10),
-             ('50 fps', ops_transition_auto[1], lambda fdm: fdm['velocities/vt-fps'] > 50),
-             ('100 fps', ops_transition_auto[2], lambda fdm: fdm['velocities/vt-fps'] > 100),
-             ('150 fps', ops_transition_auto[3], lambda fdm: fdm['velocities/vt-fps'] > 150),
-             ('200 fps', ops_transition_auto[4], lambda fdm: fdm['velocities/vt-fps'] > 200),
-             ('250 fps', ops_transition_auto[5], lambda fdm: fdm['velocities/vt-fps'] > 250),
-             ('300 fps', ops_transition_auto[6], lambda fdm: fdm['velocities/vt-fps'] > 300),
-             ('400 fps', ops_transition_auto[7], lambda fdm: fdm['velocities/vt-fps'] > 400),
-             ('500 fps', ops_transition_auto[7], lambda fdm: fdm['velocities/vt-fps'] > 500),
-             ('600 fps', ops_transition_auto[7], lambda fdm: fdm['velocities/vt-fps'] > 600),
-    ],
-    tf=120,
-    realtime=True, verbose=True)
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{log\PYZus{}takeoff\PYZus{}auto} \PY{o}{=} \PY{n}{simulate}\PY{p}{(}
+    \PY{n}{aircraft}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{F\PYZhy{}35B\PYZhy{}2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+    \PY{n}{op\PYZus{}0}\PY{o}{=}\PY{n}{op\PYZus{}ground}\PY{p}{,}
+    \PY{n}{op\PYZus{}list}\PY{o}{=}\PY{p}{[}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{hover}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{op\PYZus{}hover\PYZus{}auto}\PY{p}{,} \PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{o}{.}\PY{n}{get\PYZus{}sim\PYZus{}time}\PY{p}{(}\PY{p}{)} \PY{o}{\PYZgt{}} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{,}
+             \PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{10 fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{ops\PYZus{}transition\PYZus{}auto}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{o}{.}\PY{n}{get\PYZus{}sim\PYZus{}time}\PY{p}{(}\PY{p}{)} \PY{o}{\PYZgt{}} \PY{l+m+mi}{10}\PY{p}{)}\PY{p}{,}
+             \PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{50 fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{ops\PYZus{}transition\PYZus{}auto}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{velocities/vt\PYZhy{}fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{\PYZgt{}} \PY{l+m+mi}{50}\PY{p}{)}\PY{p}{,}
+             \PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{100 fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{ops\PYZus{}transition\PYZus{}auto}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{p}{,} \PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{velocities/vt\PYZhy{}fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{\PYZgt{}} \PY{l+m+mi}{100}\PY{p}{)}\PY{p}{,}
+             \PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{150 fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{ops\PYZus{}transition\PYZus{}auto}\PY{p}{[}\PY{l+m+mi}{3}\PY{p}{]}\PY{p}{,} \PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{velocities/vt\PYZhy{}fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{\PYZgt{}} \PY{l+m+mi}{150}\PY{p}{)}\PY{p}{,}
+             \PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{200 fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{ops\PYZus{}transition\PYZus{}auto}\PY{p}{[}\PY{l+m+mi}{4}\PY{p}{]}\PY{p}{,} \PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{velocities/vt\PYZhy{}fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{\PYZgt{}} \PY{l+m+mi}{200}\PY{p}{)}\PY{p}{,}
+             \PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{250 fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{ops\PYZus{}transition\PYZus{}auto}\PY{p}{[}\PY{l+m+mi}{5}\PY{p}{]}\PY{p}{,} \PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{velocities/vt\PYZhy{}fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{\PYZgt{}} \PY{l+m+mi}{250}\PY{p}{)}\PY{p}{,}
+             \PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{300 fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{ops\PYZus{}transition\PYZus{}auto}\PY{p}{[}\PY{l+m+mi}{6}\PY{p}{]}\PY{p}{,} \PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{velocities/vt\PYZhy{}fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{\PYZgt{}} \PY{l+m+mi}{300}\PY{p}{)}\PY{p}{,}
+             \PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{400 fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{ops\PYZus{}transition\PYZus{}auto}\PY{p}{[}\PY{l+m+mi}{7}\PY{p}{]}\PY{p}{,} \PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{velocities/vt\PYZhy{}fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{\PYZgt{}} \PY{l+m+mi}{400}\PY{p}{)}\PY{p}{,}
+             \PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{500 fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{ops\PYZus{}transition\PYZus{}auto}\PY{p}{[}\PY{l+m+mi}{7}\PY{p}{]}\PY{p}{,} \PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{velocities/vt\PYZhy{}fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{\PYZgt{}} \PY{l+m+mi}{500}\PY{p}{)}\PY{p}{,}
+             \PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{600 fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{ops\PYZus{}transition\PYZus{}auto}\PY{p}{[}\PY{l+m+mi}{7}\PY{p}{]}\PY{p}{,} \PY{k}{lambda} \PY{n}{fdm}\PY{p}{:} \PY{n}{fdm}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{velocities/vt\PYZhy{}fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{\PYZgt{}} \PY{l+m+mi}{600}\PY{p}{)}\PY{p}{,}
+    \PY{p}{]}\PY{p}{,}
+    \PY{n}{tf}\PY{o}{=}\PY{l+m+mi}{120}\PY{p}{,}
+    \PY{n}{realtime}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{verbose}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-\hypertarget{hover-controller-design}{%
+    \hypertarget{hover-controller-design}{%
 \section{Hover Controller Design}\label{hover-controller-design}}
 
-\hypertarget{pitch}{%
+    \hypertarget{pitch}{%
 \subsection{Pitch}\label{pitch}}
 
-\begin{lstlisting}[language=Python]
-sys = control.ss(*linearize(
-    aircraft='F-35B-2',
-    states=['ic/q-rad_sec'],
-    states_deriv = ['accelerations/qdot-rad_sec2'],
-    inputs=['fcs/elevator-cmd-norm'],
-    outputs=['ic/q-rad_sec'],
-    ic=op_hover,
-    dx=1e-3,
-    n_round=10
-))
-s = control.tf([1, 0], [1])
-rad2deg = 180/np.pi
-G_elev_to_pitch = rad2deg*clean_tf(control.minreal(control.ss2tf(sys), 1e-10))/s  # in degrees
-G_elev_to_pitch
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{sys} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{ss}\PY{p}{(}\PY{o}{*}\PY{n}{linearize}\PY{p}{(}
+    \PY{n}{aircraft}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{F\PYZhy{}35B\PYZhy{}2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+    \PY{n}{states}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/q\PYZhy{}rad\PYZus{}sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{states\PYZus{}deriv} \PY{o}{=} \PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/qdot\PYZhy{}rad\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{inputs}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/elevator\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{outputs}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/q\PYZhy{}rad\PYZus{}sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{ic}\PY{o}{=}\PY{n}{op\PYZus{}hover}\PY{p}{,}
+    \PY{n}{dx}\PY{o}{=}\PY{l+m+mf}{1e\PYZhy{}3}\PY{p}{,}
+    \PY{n}{n\PYZus{}round}\PY{o}{=}\PY{l+m+mi}{10}
+\PY{p}{)}\PY{p}{)}
+\PY{n}{s} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{tf}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
+\PY{n}{rad2deg} \PY{o}{=} \PY{l+m+mi}{180}\PY{o}{/}\PY{n}{np}\PY{o}{.}\PY{n}{pi}
+\PY{n}{G\PYZus{}elev\PYZus{}to\PYZus{}pitch} \PY{o}{=} \PY{n}{rad2deg}\PY{o}{*}\PY{n}{clean\PYZus{}tf}\PY{p}{(}\PY{n}{control}\PY{o}{.}\PY{n}{minreal}\PY{p}{(}\PY{n}{control}\PY{o}{.}\PY{n}{ss2tf}\PY{p}{(}\PY{n}{sys}\PY{p}{)}\PY{p}{,} \PY{l+m+mf}{1e\PYZhy{}10}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{n}{s}  \PY{c+c1}{\PYZsh{} in degrees}
+\PY{n}{G\PYZus{}elev\PYZus{}to\PYZus{}pitch}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-# # Add the actuator 
-# tau = 0.4
-# G_act = tau / (s + tau)
-# G_elev_to_pitch *= G_act
-# G_elev_to_pitch
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} \PYZsh{} Add the actuator }
+\PY{c+c1}{\PYZsh{} tau = 0.4}
+\PY{c+c1}{\PYZsh{} G\PYZus{}act = tau / (s + tau)}
+\PY{c+c1}{\PYZsh{} G\PYZus{}elev\PYZus{}to\PYZus{}pitch *= G\PYZus{}act}
+\PY{c+c1}{\PYZsh{} G\PYZus{}elev\PYZus{}to\PYZus{}pitch}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-# PD gains to lead-lag gains 
-Kp = 0.005
-Kd = 0.3
-N = 15
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} PD gains to lead\PYZhy{}lag gains }
+\PY{n}{Kp} \PY{o}{=} \PY{l+m+mf}{0.005}
+\PY{n}{Kd} \PY{o}{=} \PY{l+m+mf}{0.3}
+\PY{n}{N} \PY{o}{=} \PY{l+m+mi}{15}
 
-c1 = N*Kd + Kp
-c2 = N*Kp
-c3 = 1
-c4 = N
-
-
-print('c1: ', c1)
-print('c2: ', c2)
-print('c3: ', c3)
-print('c4: ', c4)
+\PY{n}{c1} \PY{o}{=} \PY{n}{N}\PY{o}{*}\PY{n}{Kd} \PY{o}{+} \PY{n}{Kp}
+\PY{n}{c2} \PY{o}{=} \PY{n}{N}\PY{o}{*}\PY{n}{Kp}
+\PY{n}{c3} \PY{o}{=} \PY{l+m+mi}{1}
+\PY{n}{c4} \PY{o}{=} \PY{n}{N}
 
 
-H_elev_to_pitch = (c1 * s + c2) / (c3 * s + c4)
-# H_elev_to_pitch = 1 + 0.01*s
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{c1: }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{c1}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{c2: }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{c2}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{c3: }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{c3}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{c4: }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{c4}\PY{p}{)}
 
-plt.figure()
-rootlocus(G_elev_to_pitch*H_elev_to_pitch)
-plt.plot([0, -10], [0, 10], '--')
 
-plt.figure()
-rootlocus(G_elev_to_pitch*H_elev_to_pitch)
-plt.xlim([-5, 0])
-plt.plot([0, -10], [0, 10], '--')
+\PY{n}{H\PYZus{}elev\PYZus{}to\PYZus{}pitch} \PY{o}{=} \PY{p}{(}\PY{n}{c1} \PY{o}{*} \PY{n}{s} \PY{o}{+} \PY{n}{c2}\PY{p}{)} \PY{o}{/} \PY{p}{(}\PY{n}{c3} \PY{o}{*} \PY{n}{s} \PY{o}{+} \PY{n}{c4}\PY{p}{)}
+\PY{c+c1}{\PYZsh{} H\PYZus{}elev\PYZus{}to\PYZus{}pitch = 1 + 0.01*s}
 
-Gc_elev_to_pitch = G_elev_to_pitch*H_elev_to_pitch/(1 + G_elev_to_pitch*H_elev_to_pitch)
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{n}{rootlocus}\PY{p}{(}\PY{n}{G\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{o}{*}\PY{n}{H\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{10}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{10}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
 
-plt.figure()
-step_size = 10
-t, y = control.step_response(step_size*Gc_elev_to_pitch, T=np.linspace(0, 30, 1000))
-plt.plot(t, y)
-plt.ylabel('pitch, deg')
-plt.xlabel('t, sec')
-plt.title('output')
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{n}{rootlocus}\PY{p}{(}\PY{n}{G\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{o}{*}\PY{n}{H\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{xlim}\PY{p}{(}\PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{5}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{10}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{10}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
 
-plt.figure()
-# actual error was computed in radians, so, converting back here
-e = np.deg2rad(step_size-y)
-t, u, _= control.forced_response(H_elev_to_pitch, T=t, U=e)
-plt.plot(t, u)
-plt.hlines([-1, 1], t[0], t[-1], linestyles='dashed')
-plt.title('input')
-plt.ylabel('elevator, norm')
-plt.xlabel('t, sec')
+\PY{n}{Gc\PYZus{}elev\PYZus{}to\PYZus{}pitch} \PY{o}{=} \PY{n}{G\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{o}{*}\PY{n}{H\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{o}{/}\PY{p}{(}\PY{l+m+mi}{1} \PY{o}{+} \PY{n}{G\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{o}{*}\PY{n}{H\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{p}{)}
 
-plt.figure(figsize=(15, 7))
-control.gangof4(G_elev_to_pitch, H_elev_to_pitch, Hz=False, dB=True)
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{n}{step\PYZus{}size} \PY{o}{=} \PY{l+m+mi}{10}
+\PY{n}{t}\PY{p}{,} \PY{n}{y} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{step\PYZus{}response}\PY{p}{(}\PY{n}{step\PYZus{}size}\PY{o}{*}\PY{n}{Gc\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{p}{,} \PY{n}{T}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{linspace}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{30}\PY{p}{,} \PY{l+m+mi}{1000}\PY{p}{)}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{t}\PY{p}{,} \PY{n}{y}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{pitch, deg}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{t, sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{output}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
 
-plt.figure()
-control.nyquist(Gc_elev_to_pitch, omega=np.logspace(-3, 3, 1000))
-plt.plot(np.cos(np.linspace(0,2*np.pi,100)), np.sin(np.linspace(0,2*np.pi,100)), '--')
-plt.axis('equal')
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{c+c1}{\PYZsh{} actual error was computed in radians, so, converting back here}
+\PY{n}{e} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{n}{step\PYZus{}size}\PY{o}{\PYZhy{}}\PY{n}{y}\PY{p}{)}
+\PY{n}{t}\PY{p}{,} \PY{n}{u}\PY{p}{,} \PY{n}{\PYZus{}}\PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{forced\PYZus{}response}\PY{p}{(}\PY{n}{H\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{p}{,} \PY{n}{T}\PY{o}{=}\PY{n}{t}\PY{p}{,} \PY{n}{U}\PY{o}{=}\PY{n}{e}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{t}\PY{p}{,} \PY{n}{u}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{hlines}\PY{p}{(}\PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{t}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{t}\PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{linestyles}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{dashed}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{input}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{elevator, norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{t, sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
 
-gm, pm, wg, wp = control.margin(Gc_elev_to_pitch)
-print('gain margin: ', gm)
-print('phase margin (in degrees): ', pm)
-print('Frequency for gain margin (at phase crossover, phase = -180 degrees): ', wg)
-print('Frequency for phase margin (at gain crossover, gain = 1): ', wp)
-\end{lstlisting}
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{15}\PY{p}{,} \PY{l+m+mi}{7}\PY{p}{)}\PY{p}{)}
+\PY{n}{control}\PY{o}{.}\PY{n}{gangof4}\PY{p}{(}\PY{n}{G\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{p}{,} \PY{n}{H\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{p}{,} \PY{n}{Hz}\PY{o}{=}\PY{k+kc}{False}\PY{p}{,} \PY{n}{dB}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
 
-\hypertarget{roll}{%
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{n}{control}\PY{o}{.}\PY{n}{nyquist}\PY{p}{(}\PY{n}{Gc\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{p}{,} \PY{n}{omega}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{logspace}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{3}\PY{p}{,} \PY{l+m+mi}{3}\PY{p}{,} \PY{l+m+mi}{1000}\PY{p}{)}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{cos}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{linspace}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{np}\PY{o}{.}\PY{n}{pi}\PY{p}{,}\PY{l+m+mi}{100}\PY{p}{)}\PY{p}{)}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{sin}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{linspace}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{np}\PY{o}{.}\PY{n}{pi}\PY{p}{,}\PY{l+m+mi}{100}\PY{p}{)}\PY{p}{)}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{axis}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{equal}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+
+\PY{n}{gm}\PY{p}{,} \PY{n}{pm}\PY{p}{,} \PY{n}{wg}\PY{p}{,} \PY{n}{wp} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{margin}\PY{p}{(}\PY{n}{Gc\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{gain margin: }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{gm}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{phase margin (in degrees): }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{pm}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Frequency for gain margin (at phase crossover, phase = \PYZhy{}180 degrees): }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{wg}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Frequency for phase margin (at gain crossover, gain = 1): }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{wp}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \hypertarget{roll}{%
 \subsection{Roll}\label{roll}}
 
-\begin{lstlisting}[language=Python]
-sys = control.ss(*linearize(
-    aircraft='F-35B-2',
-    states=['ic/p-rad_sec'],
-    states_deriv = ['accelerations/pdot-rad_sec2'],
-    inputs=['fcs/aileron-cmd-norm'],
-    outputs=['ic/p-rad_sec'],
-    ic=op_hover,
-    dx=1e-3,
-    n_round=3
-))
-rad2deg = 180/np.pi
-s = control.tf([1, 0], [1])
-G_aileron_to_roll = rad2deg*clean_tf(control.minreal(control.ss2tf(sys), 1e-3))/s
-G_aileron_to_roll
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{sys} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{ss}\PY{p}{(}\PY{o}{*}\PY{n}{linearize}\PY{p}{(}
+    \PY{n}{aircraft}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{F\PYZhy{}35B\PYZhy{}2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+    \PY{n}{states}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/p\PYZhy{}rad\PYZus{}sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{states\PYZus{}deriv} \PY{o}{=} \PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/pdot\PYZhy{}rad\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{inputs}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/aileron\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{outputs}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/p\PYZhy{}rad\PYZus{}sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{ic}\PY{o}{=}\PY{n}{op\PYZus{}hover}\PY{p}{,}
+    \PY{n}{dx}\PY{o}{=}\PY{l+m+mf}{1e\PYZhy{}3}\PY{p}{,}
+    \PY{n}{n\PYZus{}round}\PY{o}{=}\PY{l+m+mi}{3}
+\PY{p}{)}\PY{p}{)}
+\PY{n}{rad2deg} \PY{o}{=} \PY{l+m+mi}{180}\PY{o}{/}\PY{n}{np}\PY{o}{.}\PY{n}{pi}
+\PY{n}{s} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{tf}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
+\PY{n}{G\PYZus{}aileron\PYZus{}to\PYZus{}roll} \PY{o}{=} \PY{n}{rad2deg}\PY{o}{*}\PY{n}{clean\PYZus{}tf}\PY{p}{(}\PY{n}{control}\PY{o}{.}\PY{n}{minreal}\PY{p}{(}\PY{n}{control}\PY{o}{.}\PY{n}{ss2tf}\PY{p}{(}\PY{n}{sys}\PY{p}{)}\PY{p}{,} \PY{l+m+mf}{1e\PYZhy{}3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{n}{s}
+\PY{n}{G\PYZus{}aileron\PYZus{}to\PYZus{}roll}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-# # Add the actuator 
-# tau = 0.4
-# G_act = tau / (s + tau)
-# G_aileron_to_roll *= G_act
-# G_aileron_to_roll
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} \PYZsh{} Add the actuator }
+\PY{c+c1}{\PYZsh{} tau = 0.4}
+\PY{c+c1}{\PYZsh{} G\PYZus{}act = tau / (s + tau)}
+\PY{c+c1}{\PYZsh{} G\PYZus{}aileron\PYZus{}to\PYZus{}roll *= G\PYZus{}act}
+\PY{c+c1}{\PYZsh{} G\PYZus{}aileron\PYZus{}to\PYZus{}roll}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-# PD gains to lead-lag gains 
-Kp = 0.0205
-Kd = 0.0215
-N = 10
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} PD gains to lead\PYZhy{}lag gains }
+\PY{n}{Kp} \PY{o}{=} \PY{l+m+mf}{0.0205}
+\PY{n}{Kd} \PY{o}{=} \PY{l+m+mf}{0.0215}
+\PY{n}{N} \PY{o}{=} \PY{l+m+mi}{10}
 
-c1 = N*Kd + Kp
-c2 = N*Kp
-c3 = 1
-c4 = N
+\PY{n}{c1} \PY{o}{=} \PY{n}{N}\PY{o}{*}\PY{n}{Kd} \PY{o}{+} \PY{n}{Kp}
+\PY{n}{c2} \PY{o}{=} \PY{n}{N}\PY{o}{*}\PY{n}{Kp}
+\PY{n}{c3} \PY{o}{=} \PY{l+m+mi}{1}
+\PY{n}{c4} \PY{o}{=} \PY{n}{N}
 
-print('c1: ', c1)
-print('c2: ', c2)
-print('c3: ', c3)
-print('c4: ', c4)
-
-
-H_aileron_to_roll = (c1 * s + c2) / (c3 * s + c4)
-
-plt.figure()
-rootlocus(G_aileron_to_roll*H_aileron_to_roll)
-plt.plot([0, -1], [0, 1], '--')
-
-plt.figure()
-rootlocus(G_aileron_to_roll*H_aileron_to_roll)
-plt.xlim([-1.5, 0])
-plt.plot([0, -1], [0, 1], '--')
-
-Gc_aileron_to_roll  = G_aileron_to_roll*H_aileron_to_roll/(1 + G_aileron_to_roll*H_aileron_to_roll)
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{c1: }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{c1}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{c2: }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{c2}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{c3: }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{c3}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{c4: }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{c4}\PY{p}{)}
 
 
-plt.figure()
-step_size = 10
-t, y = control.step_response(step_size*Gc_aileron_to_roll, T=np.linspace(0, 30, 1000))
-plt.plot(t, y)
-plt.xlabel('t, sec')
-plt.ylabel('roll, deg')
-plt.title('output')
+\PY{n}{H\PYZus{}aileron\PYZus{}to\PYZus{}roll} \PY{o}{=} \PY{p}{(}\PY{n}{c1} \PY{o}{*} \PY{n}{s} \PY{o}{+} \PY{n}{c2}\PY{p}{)} \PY{o}{/} \PY{p}{(}\PY{n}{c3} \PY{o}{*} \PY{n}{s} \PY{o}{+} \PY{n}{c4}\PY{p}{)}
 
-plt.figure()
-# actual error was computed in radians, so, converting back here
-e = np.deg2rad(step_size-y)
-t, u, _= control.forced_response(H_aileron_to_roll, T=t, U=e)
-plt.hlines([-0.1, 0.1], t[0], t[-1], linestyles='dashed')
-plt.plot(t, u)
-plt.xlabel('t, sec')
-plt.ylabel('aileron %')
-plt.title('input')
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{n}{rootlocus}\PY{p}{(}\PY{n}{G\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{o}{*}\PY{n}{H\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
 
-plt.figure()
-control.nyquist(Gc_aileron_to_roll, omega=np.logspace(-3, 3, 1000))
-plt.plot(np.cos(np.linspace(0,2*np.pi,100)), np.sin(np.linspace(0,2*np.pi,100)), '--')
-plt.axis('equal')
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{n}{rootlocus}\PY{p}{(}\PY{n}{G\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{o}{*}\PY{n}{H\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{xlim}\PY{p}{(}\PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mf}{1.5}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
 
-plt.figure(figsize=(15, 7))
-control.gangof4(G_aileron_to_roll, H_aileron_to_roll, Hz=False, dB=True)
+\PY{n}{Gc\PYZus{}aileron\PYZus{}to\PYZus{}roll}  \PY{o}{=} \PY{n}{G\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{o}{*}\PY{n}{H\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{o}{/}\PY{p}{(}\PY{l+m+mi}{1} \PY{o}{+} \PY{n}{G\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{o}{*}\PY{n}{H\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{p}{)}
 
-gm, pm, wg, wp = control.margin(Gc_aileron_to_roll)
-print('gain margin: ', gm)
-print('phase margin (in degrees): ', pm)
-print('Frequency for gain margin (at phase crossover, phase = -180 degrees): ', wg)
-print('Frequency for phase margin (at gain crossover, gain = 1): ', wp)
-\end{lstlisting}
 
-\begin{lstlisting}[language=Python]
-# Open loop 
-G_aileron_to_roll*H_aileron_to_roll
-\end{lstlisting}
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{n}{step\PYZus{}size} \PY{o}{=} \PY{l+m+mi}{10}
+\PY{n}{t}\PY{p}{,} \PY{n}{y} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{step\PYZus{}response}\PY{p}{(}\PY{n}{step\PYZus{}size}\PY{o}{*}\PY{n}{Gc\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{p}{,} \PY{n}{T}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{linspace}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{30}\PY{p}{,} \PY{l+m+mi}{1000}\PY{p}{)}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{t}\PY{p}{,} \PY{n}{y}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{t, sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{roll, deg}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{output}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
 
-\begin{lstlisting}[language=Python]
-# Closed loop 
-Gc_aileron_to_roll
-\end{lstlisting}
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{c+c1}{\PYZsh{} actual error was computed in radians, so, converting back here}
+\PY{n}{e} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{n}{step\PYZus{}size}\PY{o}{\PYZhy{}}\PY{n}{y}\PY{p}{)}
+\PY{n}{t}\PY{p}{,} \PY{n}{u}\PY{p}{,} \PY{n}{\PYZus{}}\PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{forced\PYZus{}response}\PY{p}{(}\PY{n}{H\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{p}{,} \PY{n}{T}\PY{o}{=}\PY{n}{t}\PY{p}{,} \PY{n}{U}\PY{o}{=}\PY{n}{e}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{hlines}\PY{p}{(}\PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mf}{0.1}\PY{p}{,} \PY{l+m+mf}{0.1}\PY{p}{]}\PY{p}{,} \PY{n}{t}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{t}\PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{linestyles}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{dashed}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{t}\PY{p}{,} \PY{n}{u}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{t, sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{aileron }\PY{l+s+s1}{\PYZpc{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{input}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
 
-\hypertarget{yaw}{%
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{n}{control}\PY{o}{.}\PY{n}{nyquist}\PY{p}{(}\PY{n}{Gc\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{p}{,} \PY{n}{omega}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{logspace}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{3}\PY{p}{,} \PY{l+m+mi}{3}\PY{p}{,} \PY{l+m+mi}{1000}\PY{p}{)}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{cos}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{linspace}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{np}\PY{o}{.}\PY{n}{pi}\PY{p}{,}\PY{l+m+mi}{100}\PY{p}{)}\PY{p}{)}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{sin}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{linspace}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{np}\PY{o}{.}\PY{n}{pi}\PY{p}{,}\PY{l+m+mi}{100}\PY{p}{)}\PY{p}{)}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{axis}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{equal}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{15}\PY{p}{,} \PY{l+m+mi}{7}\PY{p}{)}\PY{p}{)}
+\PY{n}{control}\PY{o}{.}\PY{n}{gangof4}\PY{p}{(}\PY{n}{G\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{p}{,} \PY{n}{H\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{p}{,} \PY{n}{Hz}\PY{o}{=}\PY{k+kc}{False}\PY{p}{,} \PY{n}{dB}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+
+\PY{n}{gm}\PY{p}{,} \PY{n}{pm}\PY{p}{,} \PY{n}{wg}\PY{p}{,} \PY{n}{wp} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{margin}\PY{p}{(}\PY{n}{Gc\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{gain margin: }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{gm}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{phase margin (in degrees): }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{pm}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Frequency for gain margin (at phase crossover, phase = \PYZhy{}180 degrees): }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{wg}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Frequency for phase margin (at gain crossover, gain = 1): }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{wp}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} Open loop }
+\PY{n}{G\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{o}{*}\PY{n}{H\PYZus{}aileron\PYZus{}to\PYZus{}roll}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} Closed loop }
+\PY{n}{Gc\PYZus{}aileron\PYZus{}to\PYZus{}roll}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \hypertarget{yaw}{%
 \subsection{Yaw}\label{yaw}}
 
-\hypertarget{engine0-right-cold-post}{%
+    \hypertarget{engine0-right-cold-post}{%
 \subsection{Engine0 (right cold post)}\label{engine0-right-cold-post}}
 
-\begin{lstlisting}[language=Python]
-# import scipy.signal as scysig
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} import scipy.signal as scysig}
 
-sys1 = control.ss(*linearize(
-    aircraft='F-35B-2',
-    states=['ic/r-rad_sec'],
-    states_deriv = ['accelerations/rdot-rad_sec2'],
-    inputs=['propulsion/engine/pitch-angle-rad'],
-    outputs=['ic/r-rad_sec'],
-    ic=op_hover,
-    dx=1e-3,
-    n_round=3
-))
-s = control.tf([1, 0], [1])
+\PY{n}{sys1} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{ss}\PY{p}{(}\PY{o}{*}\PY{n}{linearize}\PY{p}{(}
+    \PY{n}{aircraft}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{F\PYZhy{}35B\PYZhy{}2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+    \PY{n}{states}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/r\PYZhy{}rad\PYZus{}sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{states\PYZus{}deriv} \PY{o}{=} \PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/rdot\PYZhy{}rad\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{inputs}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{outputs}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/r\PYZhy{}rad\PYZus{}sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{ic}\PY{o}{=}\PY{n}{op\PYZus{}hover}\PY{p}{,}
+    \PY{n}{dx}\PY{o}{=}\PY{l+m+mf}{1e\PYZhy{}3}\PY{p}{,}
+    \PY{n}{n\PYZus{}round}\PY{o}{=}\PY{l+m+mi}{3}
+\PY{p}{)}\PY{p}{)}
+\PY{n}{s} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{tf}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
 
-# # G_rudder_to_yaw = -clean_tf(control.minreal(control.ss2tf(sys), 1e-3))/s
-# print(sys)
-# temp = scysig.ss2tf(sys.A, sys.B, sys.C, sys.D)
-# print(temp)
+\PY{c+c1}{\PYZsh{} \PYZsh{} G\PYZus{}rudder\PYZus{}to\PYZus{}yaw = \PYZhy{}clean\PYZus{}tf(control.minreal(control.ss2tf(sys), 1e\PYZhy{}3))/s}
+\PY{c+c1}{\PYZsh{} print(sys)}
+\PY{c+c1}{\PYZsh{} temp = scysig.ss2tf(sys.A, sys.B, sys.C, sys.D)}
+\PY{c+c1}{\PYZsh{} print(temp)}
 
-G_rudder_to_yaw1 = -clean_tf(control.minreal(control.ss2tf(sys1), 1e-3))/s
-G_rudder_to_yaw1
-\end{lstlisting}
+\PY{n}{G\PYZus{}rudder\PYZus{}to\PYZus{}yaw1} \PY{o}{=} \PY{o}{\PYZhy{}}\PY{n}{clean\PYZus{}tf}\PY{p}{(}\PY{n}{control}\PY{o}{.}\PY{n}{minreal}\PY{p}{(}\PY{n}{control}\PY{o}{.}\PY{n}{ss2tf}\PY{p}{(}\PY{n}{sys1}\PY{p}{)}\PY{p}{,} \PY{l+m+mf}{1e\PYZhy{}3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{n}{s}
+\PY{n}{G\PYZus{}rudder\PYZus{}to\PYZus{}yaw1}
+\end{Verbatim}
+\end{tcolorbox}
 
-\hypertarget{engine1-right-hot-post}{%
+    \hypertarget{engine1-right-hot-post}{%
 \subsection{Engine1 (right hot post)}\label{engine1-right-hot-post}}
 
-\begin{lstlisting}[language=Python]
-sys2 = control.ss(*linearize(
-    aircraft='F-35B-2',
-    states=['ic/r-rad_sec'],
-    states_deriv = ['accelerations/rdot-rad_sec2'],
-    inputs=['propulsion/engine[1]/pitch-angle-rad'],
-    outputs=['ic/r-rad_sec'],
-    ic=op_hover,
-    dx=1e-3,
-    n_round=3
-))
-s = control.tf([1, 0], [1])
-G_rudder_to_yaw2 = -clean_tf(control.minreal(control.ss2tf(sys2), 1e-3))/s
-G_rudder_to_yaw2
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{sys2} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{ss}\PY{p}{(}\PY{o}{*}\PY{n}{linearize}\PY{p}{(}
+    \PY{n}{aircraft}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{F\PYZhy{}35B\PYZhy{}2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+    \PY{n}{states}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/r\PYZhy{}rad\PYZus{}sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{states\PYZus{}deriv} \PY{o}{=} \PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/rdot\PYZhy{}rad\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{inputs}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine[1]/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{outputs}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/r\PYZhy{}rad\PYZus{}sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{ic}\PY{o}{=}\PY{n}{op\PYZus{}hover}\PY{p}{,}
+    \PY{n}{dx}\PY{o}{=}\PY{l+m+mf}{1e\PYZhy{}3}\PY{p}{,}
+    \PY{n}{n\PYZus{}round}\PY{o}{=}\PY{l+m+mi}{3}
+\PY{p}{)}\PY{p}{)}
+\PY{n}{s} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{tf}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
+\PY{n}{G\PYZus{}rudder\PYZus{}to\PYZus{}yaw2} \PY{o}{=} \PY{o}{\PYZhy{}}\PY{n}{clean\PYZus{}tf}\PY{p}{(}\PY{n}{control}\PY{o}{.}\PY{n}{minreal}\PY{p}{(}\PY{n}{control}\PY{o}{.}\PY{n}{ss2tf}\PY{p}{(}\PY{n}{sys2}\PY{p}{)}\PY{p}{,} \PY{l+m+mf}{1e\PYZhy{}3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{n}{s}
+\PY{n}{G\PYZus{}rudder\PYZus{}to\PYZus{}yaw2}
+\end{Verbatim}
+\end{tcolorbox}
 
-\hypertarget{engine2-left-cold-post}{%
+    \hypertarget{engine2-left-cold-post}{%
 \subsection{Engine2 (left cold post)}\label{engine2-left-cold-post}}
 
-\begin{lstlisting}[language=Python]
-sys3 = control.ss(*linearize(
-    aircraft='F-35B-2',
-    states=['ic/r-rad_sec'],
-    states_deriv = ['accelerations/rdot-rad_sec2'],
-    inputs=['propulsion/engine[2]/pitch-angle-rad'],
-    outputs=['ic/r-rad_sec'],
-    ic=op_hover,
-    dx=1e-3,
-    n_round=3
-))
-s = control.tf([1, 0], [1])
-G_rudder_to_yaw3 = -clean_tf(control.minreal(control.ss2tf(sys3), 1e-3))/s
-G_rudder_to_yaw3
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{sys3} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{ss}\PY{p}{(}\PY{o}{*}\PY{n}{linearize}\PY{p}{(}
+    \PY{n}{aircraft}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{F\PYZhy{}35B\PYZhy{}2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+    \PY{n}{states}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/r\PYZhy{}rad\PYZus{}sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{states\PYZus{}deriv} \PY{o}{=} \PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/rdot\PYZhy{}rad\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{inputs}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine[2]/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{outputs}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/r\PYZhy{}rad\PYZus{}sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{ic}\PY{o}{=}\PY{n}{op\PYZus{}hover}\PY{p}{,}
+    \PY{n}{dx}\PY{o}{=}\PY{l+m+mf}{1e\PYZhy{}3}\PY{p}{,}
+    \PY{n}{n\PYZus{}round}\PY{o}{=}\PY{l+m+mi}{3}
+\PY{p}{)}\PY{p}{)}
+\PY{n}{s} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{tf}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
+\PY{n}{G\PYZus{}rudder\PYZus{}to\PYZus{}yaw3} \PY{o}{=} \PY{o}{\PYZhy{}}\PY{n}{clean\PYZus{}tf}\PY{p}{(}\PY{n}{control}\PY{o}{.}\PY{n}{minreal}\PY{p}{(}\PY{n}{control}\PY{o}{.}\PY{n}{ss2tf}\PY{p}{(}\PY{n}{sys3}\PY{p}{)}\PY{p}{,} \PY{l+m+mf}{1e\PYZhy{}3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{n}{s}
+\PY{n}{G\PYZus{}rudder\PYZus{}to\PYZus{}yaw3}
+\end{Verbatim}
+\end{tcolorbox}
 
-\hypertarget{engine3-left-hot-post}{%
+    \hypertarget{engine3-left-hot-post}{%
 \subsection{Engine3 (left hot post)}\label{engine3-left-hot-post}}
 
-\begin{lstlisting}[language=Python]
-sys4 = control.ss(*linearize(
-    aircraft='F-35B-2',
-    states=['ic/r-rad_sec'],
-    states_deriv = ['accelerations/rdot-rad_sec2'],
-    inputs=['propulsion/engine[3]/pitch-angle-rad'],
-    outputs=['ic/r-rad_sec'],
-    ic=op_hover,
-    dx=1e-3,
-    n_round=3
-))
-s = control.tf([1, 0], [1])
-G_rudder_to_yaw4 = -clean_tf(control.minreal(control.ss2tf(sys4), 1e-3))/s
-G_rudder_to_yaw4
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{sys4} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{ss}\PY{p}{(}\PY{o}{*}\PY{n}{linearize}\PY{p}{(}
+    \PY{n}{aircraft}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{F\PYZhy{}35B\PYZhy{}2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+    \PY{n}{states}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/r\PYZhy{}rad\PYZus{}sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{states\PYZus{}deriv} \PY{o}{=} \PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/rdot\PYZhy{}rad\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{inputs}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine[3]/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{outputs}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/r\PYZhy{}rad\PYZus{}sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{ic}\PY{o}{=}\PY{n}{op\PYZus{}hover}\PY{p}{,}
+    \PY{n}{dx}\PY{o}{=}\PY{l+m+mf}{1e\PYZhy{}3}\PY{p}{,}
+    \PY{n}{n\PYZus{}round}\PY{o}{=}\PY{l+m+mi}{3}
+\PY{p}{)}\PY{p}{)}
+\PY{n}{s} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{tf}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
+\PY{n}{G\PYZus{}rudder\PYZus{}to\PYZus{}yaw4} \PY{o}{=} \PY{o}{\PYZhy{}}\PY{n}{clean\PYZus{}tf}\PY{p}{(}\PY{n}{control}\PY{o}{.}\PY{n}{minreal}\PY{p}{(}\PY{n}{control}\PY{o}{.}\PY{n}{ss2tf}\PY{p}{(}\PY{n}{sys4}\PY{p}{)}\PY{p}{,} \PY{l+m+mf}{1e\PYZhy{}3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{n}{s}
+\PY{n}{G\PYZus{}rudder\PYZus{}to\PYZus{}yaw4}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-sys1 = control.series(sys1, -1/s)
-sys1 = control.tf2ss(sys1)
-sys2 = control.series(sys2, -1/s)
-sys2 = control.tf2ss(sys2)
-sys3 = control.series(sys3, -1/s)
-sys3 = control.tf2ss(sys3)
-sys4 = control.series(sys4, -1/s)
-sys4 = control.tf2ss(sys4)
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{sys1} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{series}\PY{p}{(}\PY{n}{sys1}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{o}{/}\PY{n}{s}\PY{p}{)}
+\PY{n}{sys1} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{tf2ss}\PY{p}{(}\PY{n}{sys1}\PY{p}{)}
+\PY{n}{sys2} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{series}\PY{p}{(}\PY{n}{sys2}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{o}{/}\PY{n}{s}\PY{p}{)}
+\PY{n}{sys2} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{tf2ss}\PY{p}{(}\PY{n}{sys2}\PY{p}{)}
+\PY{n}{sys3} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{series}\PY{p}{(}\PY{n}{sys3}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{o}{/}\PY{n}{s}\PY{p}{)}
+\PY{n}{sys3} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{tf2ss}\PY{p}{(}\PY{n}{sys3}\PY{p}{)}
+\PY{n}{sys4} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{series}\PY{p}{(}\PY{n}{sys4}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{o}{/}\PY{n}{s}\PY{p}{)}
+\PY{n}{sys4} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{tf2ss}\PY{p}{(}\PY{n}{sys4}\PY{p}{)}
 
-sys_yaw = control.append(sys1, sys2, sys3, sys4)
-sys_yaw = control.ss2tf(sys_yaw)
-sys_yaw
-\end{lstlisting}
+\PY{n}{sys\PYZus{}yaw} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n}{sys1}\PY{p}{,} \PY{n}{sys2}\PY{p}{,} \PY{n}{sys3}\PY{p}{,} \PY{n}{sys4}\PY{p}{)}
+\PY{n}{sys\PYZus{}yaw} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{ss2tf}\PY{p}{(}\PY{n}{sys\PYZus{}yaw}\PY{p}{)}
+\PY{n}{sys\PYZus{}yaw}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-# Engine nozzle pitch actuator 
-tau_enp = 2
-G_enp_act = tau_enp / (s + tau_enp)
-G_aileron_to_roll *= G_enp_act
-G_aileron_to_roll
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} Engine nozzle pitch actuator }
+\PY{n}{tau\PYZus{}enp} \PY{o}{=} \PY{l+m+mi}{2}
+\PY{n}{G\PYZus{}enp\PYZus{}act} \PY{o}{=} \PY{n}{tau\PYZus{}enp} \PY{o}{/} \PY{p}{(}\PY{n}{s} \PY{o}{+} \PY{n}{tau\PYZus{}enp}\PY{p}{)}
+\PY{n}{G\PYZus{}aileron\PYZus{}to\PYZus{}roll} \PY{o}{*}\PY{o}{=} \PY{n}{G\PYZus{}enp\PYZus{}act}
+\PY{n}{G\PYZus{}aileron\PYZus{}to\PYZus{}roll}
+\end{Verbatim}
+\end{tcolorbox}
 
-\hypertarget{altitude}{%
+    \hypertarget{altitude}{%
 \subsection{Altitude}\label{altitude}}
 
-\begin{lstlisting}[language=Python]
-sys = control.ss(*linearize(
-    aircraft='F-35B-2',
-    states=['ic/w-fps'],
-    states_deriv = ['accelerations/wdot-ft_sec2'],
-    inputs=['fcs/throttle-cmd-norm'],
-    outputs=['ic/w-fps'],
-    ic=op_hover,
-    dx=1e-3,
-    n_round=3
-))
-G_throttle_to_alt = -clean_tf(control.minreal(control.ss2tf(sys), 1e-3))/s
-G_throttle_to_alt
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{sys} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{ss}\PY{p}{(}\PY{o}{*}\PY{n}{linearize}\PY{p}{(}
+    \PY{n}{aircraft}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{F\PYZhy{}35B\PYZhy{}2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+    \PY{n}{states}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/w\PYZhy{}fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{states\PYZus{}deriv} \PY{o}{=} \PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/wdot\PYZhy{}ft\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{inputs}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/throttle\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{outputs}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/w\PYZhy{}fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{ic}\PY{o}{=}\PY{n}{op\PYZus{}hover}\PY{p}{,}
+    \PY{n}{dx}\PY{o}{=}\PY{l+m+mf}{1e\PYZhy{}3}\PY{p}{,}
+    \PY{n}{n\PYZus{}round}\PY{o}{=}\PY{l+m+mi}{3}
+\PY{p}{)}\PY{p}{)}
+\PY{n}{G\PYZus{}throttle\PYZus{}to\PYZus{}alt} \PY{o}{=} \PY{o}{\PYZhy{}}\PY{n}{clean\PYZus{}tf}\PY{p}{(}\PY{n}{control}\PY{o}{.}\PY{n}{minreal}\PY{p}{(}\PY{n}{control}\PY{o}{.}\PY{n}{ss2tf}\PY{p}{(}\PY{n}{sys}\PY{p}{)}\PY{p}{,} \PY{l+m+mf}{1e\PYZhy{}3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{n}{s}
+\PY{n}{G\PYZus{}throttle\PYZus{}to\PYZus{}alt}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-# # Add the actuator 
-# tau = 0.4
-# G_act = tau / (s + tau)
-# G_throttle_to_alt *= G_act
-# G_throttle_to_alt
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} \PYZsh{} Add the actuator }
+\PY{c+c1}{\PYZsh{} tau = 0.4}
+\PY{c+c1}{\PYZsh{} G\PYZus{}act = tau / (s + tau)}
+\PY{c+c1}{\PYZsh{} G\PYZus{}throttle\PYZus{}to\PYZus{}alt *= G\PYZus{}act}
+\PY{c+c1}{\PYZsh{} G\PYZus{}throttle\PYZus{}to\PYZus{}alt}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-# PD gains to lead-lag gains 
-Kp = 0.0004
-Kd = 0.0045
-N = 0.6
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} PD gains to lead\PYZhy{}lag gains }
+\PY{n}{Kp} \PY{o}{=} \PY{l+m+mf}{0.0004}
+\PY{n}{Kd} \PY{o}{=} \PY{l+m+mf}{0.0045}
+\PY{n}{N} \PY{o}{=} \PY{l+m+mf}{0.6}
 
-c1 = N*Kd + Kp
-c2 = N*Kp
-c3 = 1
-c4 = N
-
-
-print('c1: ', c1)
-print('c2: ', c2)
-print('c3: ', c3)
-print('c4: ', c4)
-
-
-H_throttle_to_alt = (c1 * s + c2) / (c3 * s + c4)
-
-
-plt.figure()
-rootlocus(G_throttle_to_alt*H_throttle_to_alt)
-plt.plot([0, -1], [0, 1], '--')
+\PY{n}{c1} \PY{o}{=} \PY{n}{N}\PY{o}{*}\PY{n}{Kd} \PY{o}{+} \PY{n}{Kp}
+\PY{n}{c2} \PY{o}{=} \PY{n}{N}\PY{o}{*}\PY{n}{Kp}
+\PY{n}{c3} \PY{o}{=} \PY{l+m+mi}{1}
+\PY{n}{c4} \PY{o}{=} \PY{n}{N}
 
 
-Gc_throttle_to_alt = G_throttle_to_alt*H_throttle_to_alt/(1 + G_throttle_to_alt*H_throttle_to_alt)
-
-plt.figure()
-step_size = 10
-t, y = control.step_response(step_size*Gc_throttle_to_alt, T=np.linspace(0, 40, 1000))
-plt.plot(t, y)
-plt.xlabel('t, sec')
-plt.ylabel('altitude, ft')
-plt.title('output')
-
-plt.figure()
-# error computed in ft
-e = step_size-y
-t, u, _= control.forced_response(H_throttle_to_alt, T=t, U=e)
-plt.hlines([-0.1, 0.1], t[0], t[-1], linestyles='dashed')
-plt.plot(t, u)
-plt.xlabel('t, sec')
-plt.ylabel('throtle %')
-plt.title('input')
-
-plt.figure()
-control.nyquist(Gc_throttle_to_alt, omega=np.logspace(-3, 3, 1000))
-plt.plot(np.cos(np.linspace(0,2*np.pi,100)), np.sin(np.linspace(0,2*np.pi,100)), '--')
-plt.axis('equal')
-
-plt.figure(figsize=(15, 7))
-control.gangof4(G_throttle_to_alt, H_throttle_to_alt, Hz=False, dB=True)
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{c1: }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{c1}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{c2: }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{c2}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{c3: }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{c3}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{c4: }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{c4}\PY{p}{)}
 
 
-gm, pm, wg, wp = control.margin(Gc_throttle_to_alt)
-print('gain margin: ', gm)
-print('phase margin (in degrees): ', pm)
-print('Frequency for gain margin (at phase crossover, phase = -180 degrees): ', wg)
-print('Frequency for phase margin (at gain crossover, gain = 1): ', wp)
-\end{lstlisting}
+\PY{n}{H\PYZus{}throttle\PYZus{}to\PYZus{}alt} \PY{o}{=} \PY{p}{(}\PY{n}{c1} \PY{o}{*} \PY{n}{s} \PY{o}{+} \PY{n}{c2}\PY{p}{)} \PY{o}{/} \PY{p}{(}\PY{n}{c3} \PY{o}{*} \PY{n}{s} \PY{o}{+} \PY{n}{c4}\PY{p}{)}
 
-\hypertarget{cruise-controller-design}{%
+
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{n}{rootlocus}\PY{p}{(}\PY{n}{G\PYZus{}throttle\PYZus{}to\PYZus{}alt}\PY{o}{*}\PY{n}{H\PYZus{}throttle\PYZus{}to\PYZus{}alt}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+
+
+\PY{n}{Gc\PYZus{}throttle\PYZus{}to\PYZus{}alt} \PY{o}{=} \PY{n}{G\PYZus{}throttle\PYZus{}to\PYZus{}alt}\PY{o}{*}\PY{n}{H\PYZus{}throttle\PYZus{}to\PYZus{}alt}\PY{o}{/}\PY{p}{(}\PY{l+m+mi}{1} \PY{o}{+} \PY{n}{G\PYZus{}throttle\PYZus{}to\PYZus{}alt}\PY{o}{*}\PY{n}{H\PYZus{}throttle\PYZus{}to\PYZus{}alt}\PY{p}{)}
+
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{n}{step\PYZus{}size} \PY{o}{=} \PY{l+m+mi}{10}
+\PY{n}{t}\PY{p}{,} \PY{n}{y} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{step\PYZus{}response}\PY{p}{(}\PY{n}{step\PYZus{}size}\PY{o}{*}\PY{n}{Gc\PYZus{}throttle\PYZus{}to\PYZus{}alt}\PY{p}{,} \PY{n}{T}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{linspace}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{40}\PY{p}{,} \PY{l+m+mi}{1000}\PY{p}{)}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{t}\PY{p}{,} \PY{n}{y}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{t, sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{altitude, ft}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{output}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{c+c1}{\PYZsh{} error computed in ft}
+\PY{n}{e} \PY{o}{=} \PY{n}{step\PYZus{}size}\PY{o}{\PYZhy{}}\PY{n}{y}
+\PY{n}{t}\PY{p}{,} \PY{n}{u}\PY{p}{,} \PY{n}{\PYZus{}}\PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{forced\PYZus{}response}\PY{p}{(}\PY{n}{H\PYZus{}throttle\PYZus{}to\PYZus{}alt}\PY{p}{,} \PY{n}{T}\PY{o}{=}\PY{n}{t}\PY{p}{,} \PY{n}{U}\PY{o}{=}\PY{n}{e}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{hlines}\PY{p}{(}\PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mf}{0.1}\PY{p}{,} \PY{l+m+mf}{0.1}\PY{p}{]}\PY{p}{,} \PY{n}{t}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{t}\PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{linestyles}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{dashed}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{t}\PY{p}{,} \PY{n}{u}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{t, sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{throtle }\PY{l+s+s1}{\PYZpc{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{input}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{n}{control}\PY{o}{.}\PY{n}{nyquist}\PY{p}{(}\PY{n}{Gc\PYZus{}throttle\PYZus{}to\PYZus{}alt}\PY{p}{,} \PY{n}{omega}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{logspace}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{3}\PY{p}{,} \PY{l+m+mi}{3}\PY{p}{,} \PY{l+m+mi}{1000}\PY{p}{)}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{cos}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{linspace}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{np}\PY{o}{.}\PY{n}{pi}\PY{p}{,}\PY{l+m+mi}{100}\PY{p}{)}\PY{p}{)}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{sin}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{linspace}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{np}\PY{o}{.}\PY{n}{pi}\PY{p}{,}\PY{l+m+mi}{100}\PY{p}{)}\PY{p}{)}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{axis}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{equal}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{15}\PY{p}{,} \PY{l+m+mi}{7}\PY{p}{)}\PY{p}{)}
+\PY{n}{control}\PY{o}{.}\PY{n}{gangof4}\PY{p}{(}\PY{n}{G\PYZus{}throttle\PYZus{}to\PYZus{}alt}\PY{p}{,} \PY{n}{H\PYZus{}throttle\PYZus{}to\PYZus{}alt}\PY{p}{,} \PY{n}{Hz}\PY{o}{=}\PY{k+kc}{False}\PY{p}{,} \PY{n}{dB}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+
+
+\PY{n}{gm}\PY{p}{,} \PY{n}{pm}\PY{p}{,} \PY{n}{wg}\PY{p}{,} \PY{n}{wp} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{margin}\PY{p}{(}\PY{n}{Gc\PYZus{}throttle\PYZus{}to\PYZus{}alt}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{gain margin: }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{gm}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{phase margin (in degrees): }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{pm}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Frequency for gain margin (at phase crossover, phase = \PYZhy{}180 degrees): }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{wg}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Frequency for phase margin (at gain crossover, gain = 1): }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{wp}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \hypertarget{cruise-controller-design}{%
 \section{Cruise Controller Design}\label{cruise-controller-design}}
 
-\hypertarget{pitch-1}{%
-\subsection{Pitch}\label{pitch-1}}
+    \hypertarget{pitch}{%
+\subsection{Pitch}\label{pitch}}
 
-\begin{lstlisting}[language=Python]
-sys = control.ss(*linearize(
-    aircraft='F-35B-2',
-    states=['ic/q-rad_sec'],
-    states_deriv = ['accelerations/qdot-rad_sec2'],
-    inputs=['fcs/elevator-cmd-norm'],
-    outputs=['ic/q-rad_sec'],
-    ic=op_cruise,
-    dx=1e-3,
-    n_round=3
-))
-s = control.tf([1, 0], [1])
-rad2deg = 180/np.pi
-G_elev_to_pitch = rad2deg*clean_tf(control.minreal(control.ss2tf(sys), 1e-3))/s  # in degrees
-G_elev_to_pitch
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{sys} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{ss}\PY{p}{(}\PY{o}{*}\PY{n}{linearize}\PY{p}{(}
+    \PY{n}{aircraft}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{F\PYZhy{}35B\PYZhy{}2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+    \PY{n}{states}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/q\PYZhy{}rad\PYZus{}sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{states\PYZus{}deriv} \PY{o}{=} \PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/qdot\PYZhy{}rad\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{inputs}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/elevator\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{outputs}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/q\PYZhy{}rad\PYZus{}sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{ic}\PY{o}{=}\PY{n}{op\PYZus{}cruise}\PY{p}{,}
+    \PY{n}{dx}\PY{o}{=}\PY{l+m+mf}{1e\PYZhy{}3}\PY{p}{,}
+    \PY{n}{n\PYZus{}round}\PY{o}{=}\PY{l+m+mi}{3}
+\PY{p}{)}\PY{p}{)}
+\PY{n}{s} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{tf}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
+\PY{n}{rad2deg} \PY{o}{=} \PY{l+m+mi}{180}\PY{o}{/}\PY{n}{np}\PY{o}{.}\PY{n}{pi}
+\PY{n}{G\PYZus{}elev\PYZus{}to\PYZus{}pitch} \PY{o}{=} \PY{n}{rad2deg}\PY{o}{*}\PY{n}{clean\PYZus{}tf}\PY{p}{(}\PY{n}{control}\PY{o}{.}\PY{n}{minreal}\PY{p}{(}\PY{n}{control}\PY{o}{.}\PY{n}{ss2tf}\PY{p}{(}\PY{n}{sys}\PY{p}{)}\PY{p}{,} \PY{l+m+mf}{1e\PYZhy{}3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{n}{s}  \PY{c+c1}{\PYZsh{} in degrees}
+\PY{n}{G\PYZus{}elev\PYZus{}to\PYZus{}pitch}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-# # Add the actuator 
-# tau = 0.4
-# G_act = tau / (s + tau)
-# G_elev_to_pitch *= G_act
-# G_elev_to_pitch
-\end{lstlisting}
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} \PYZsh{} Add the actuator }
+\PY{c+c1}{\PYZsh{} tau = 0.4}
+\PY{c+c1}{\PYZsh{} G\PYZus{}act = tau / (s + tau)}
+\PY{c+c1}{\PYZsh{} G\PYZus{}elev\PYZus{}to\PYZus{}pitch *= G\PYZus{}act}
+\PY{c+c1}{\PYZsh{} G\PYZus{}elev\PYZus{}to\PYZus{}pitch}
+\end{Verbatim}
+\end{tcolorbox}
 
-\begin{lstlisting}[language=Python]
-# !! <<<< THESE ARE FOR HOVER 
-# PD gains to lead-lag gains 
-Kp = 1.27231590533845e-09
-Kd = 0.0127229959138648
-N = 148.271702233295
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} !! \PYZlt{}\PYZlt{}\PYZlt{}\PYZlt{} THESE ARE FOR HOVER }
+\PY{c+c1}{\PYZsh{} PD gains to lead\PYZhy{}lag gains }
+\PY{n}{Kp} \PY{o}{=} \PY{l+m+mf}{1.27231590533845e\PYZhy{}09}
+\PY{n}{Kd} \PY{o}{=} \PY{l+m+mf}{0.0127229959138648}
+\PY{n}{N} \PY{o}{=} \PY{l+m+mf}{148.271702233295}
 
-c1 = N*Kd + Kp
-c2 = N*Kp
-c3 = 1
-c4 = N
+\PY{n}{c1} \PY{o}{=} \PY{n}{N}\PY{o}{*}\PY{n}{Kd} \PY{o}{+} \PY{n}{Kp}
+\PY{n}{c2} \PY{o}{=} \PY{n}{N}\PY{o}{*}\PY{n}{Kp}
+\PY{n}{c3} \PY{o}{=} \PY{l+m+mi}{1}
+\PY{n}{c4} \PY{o}{=} \PY{n}{N}
 
-# >>>> SUBJECT TO CHANGE !!
-
-
-
-
-H_elev_to_pitch = (c1 * s + c2) / (c3 * s + c4)
-# H_elev_to_pitch = 1 + 0.01*s
-
-plt.figure()
-rootlocus(G_elev_to_pitch*H_elev_to_pitch)
-plt.plot([0, -1], [0, 1], '--')
-
-plt.figure()
-rootlocus(G_elev_to_pitch*H_elev_to_pitch)
-plt.xlim([-1.5, 0])
-plt.plot([0, -1], [0, 1], '--')
-
-Gc_elev_to_pitch = G_elev_to_pitch*H_elev_to_pitch/(1 + G_elev_to_pitch*H_elev_to_pitch)
-
-plt.figure()
-step_size = 10
-t, y = control.step_response(step_size*Gc_elev_to_pitch, T=np.linspace(0, 30, 1000))
-plt.plot(t, y)
-plt.ylabel('pitch, deg')
-plt.xlabel('t, sec')
-plt.title('output')
-
-plt.figure()
-# actual error was computed in radians, so, converting back here
-e = np.deg2rad(step_size-y)
-t, u, _= control.forced_response(H_elev_to_pitch, T=t, U=e)
-plt.plot(t, u)
-plt.hlines([-1, 1], t[0], t[-1], linestyles='dashed')
-plt.title('input')
-plt.ylabel('elevator, norm')
-plt.xlabel('t, sec')
-
-plt.figure(figsize=(15, 7))
-control.gangof4(G_elev_to_pitch, H_elev_to_pitch, Hz=True, dB=True)
-
-plt.figure()
-control.nyquist(Gc_elev_to_pitch, omega=np.logspace(-3, 3, 1000))
-
-gm, pm, wg, wp = control.margin(Gc_elev_to_pitch)
-print('gain margin: ', gm)
-print('phase margin (in degrees): ', pm)
-print('Frequency for gain margin (at phase crossover, phase = -180 degrees): ', wg)
-print('Frequency for phase margin (at gain crossover, gain = 1): ', wp)
-\end{lstlisting}
-
-\hypertarget{roll-1}{%
-\subsection{Roll}\label{roll-1}}
-
-\begin{lstlisting}[language=Python]
-sys = control.ss(*linearize(
-    aircraft='F-35B-2',
-    states=['ic/p-rad_sec'],
-    states_deriv = ['accelerations/pdot-rad_sec2'],
-    inputs=['fcs/aileron-cmd-norm'],
-    outputs=['ic/p-rad_sec'],
-    ic=op_cruise,
-    dx=1e-3,
-    n_round=3
-))
-rad2deg = 180/np.pi
-s = control.tf([1, 0], [1])
-G_aileron_to_roll = rad2deg*clean_tf(control.minreal(control.ss2tf(sys), 1e-3))/s
-G_aileron_to_roll
-\end{lstlisting}
-
-\begin{lstlisting}[language=Python]
-# Add the actuator 
-tau = 0.4
-G_act = tau / (s + tau)
-G_aileron_to_roll *= G_act
-G_aileron_to_roll
-\end{lstlisting}
-
-\begin{lstlisting}[language=Python]
-# !! <<<< THESE ARE FOR HOVER 
-# PD gains to lead-lag gains 
-Kp = 7.66302615547072e-10
-Kd = 0.0076620813293718
-N = 505.040986830046
-
-c1 = N*Kd + Kp
-c2 = N*Kp
-c3 = 1
-c4 = N
-
-# >>>> SUBJECT TO CHANGE !!
-
-
-
-H_aileron_to_roll = (c1 * s + c2) / (c3 * s + c4)
-
-plt.figure()
-rootlocus(G_aileron_to_roll*H_aileron_to_roll)
-plt.plot([0, -1], [0, 1], '--')
-
-plt.figure()
-rootlocus(G_aileron_to_roll*H_aileron_to_roll)
-plt.xlim([-1.5, 0])
-plt.plot([0, -1], [0, 1], '--')
-
-Gc_aileron_to_roll  = G_aileron_to_roll*H_aileron_to_roll/(1 + G_aileron_to_roll*H_aileron_to_roll)
-
-
-plt.figure()
-step_size = 10
-t, y = control.step_response(step_size*Gc_aileron_to_roll, T=np.linspace(0, 30, 1000))
-plt.plot(t, y)
-plt.xlabel('t, sec')
-plt.ylabel('roll, deg')
-plt.title('output')
-
-plt.figure()
-# actual error was computed in radians, so, converting back here
-e = np.deg2rad(step_size-y)
-t, u, _= control.forced_response(H_aileron_to_roll, T=t, U=e)
-plt.hlines([-0.1, 0.1], t[0], t[-1], linestyles='dashed')
-plt.plot(t, u)
-plt.xlabel('t, sec')
-plt.ylabel('aileron %')
-plt.title('input')
-
-plt.figure()
-control.nyquist(Gc_aileron_to_roll, omega=np.logspace(-3, 3, 1000))
-
-plt.figure(figsize=(15, 7))
-control.gangof4(G_aileron_to_roll, H_aileron_to_roll, Hz=True, dB=True)
-
-gm, pm, wg, wp = control.margin(Gc_aileron_to_roll)
-print('gain margin: ', gm)
-print('phase margin (in degrees): ', pm)
-print('Frequency for gain margin (at phase crossover, phase = -180 degrees): ', wg)
-print('Frequency for phase margin (at gain crossover, gain = 1): ', wp)
-\end{lstlisting}
-
-\hypertarget{yaw-1}{%
-\subsection{Yaw}\label{yaw-1}}
-
-\begin{lstlisting}[language=Python]
-sys1 = control.ss(*linearize(
-    aircraft='F-35B-2',
-    states=['ic/r-rad_sec'],
-    states_deriv = ['accelerations/rdot-rad_sec2'],
-    inputs=['propulsion/engine/pitch-angle-rad'],
-    outputs=['ic/r-rad_sec'],
-    ic=op_hover,
-    dx=1e-3,
-    n_round=3
-))
-s = control.tf([1, 0], [1])
-
-# # G_rudder_to_yaw = -clean_tf(control.minreal(control.ss2tf(sys), 1e-3))/s
-# print(sys)
-# temp = scysig.ss2tf(sys.A, sys.B, sys.C, sys.D)
-# print(temp)
-
-G_rudder_to_yaw1 = -clean_tf(control.minreal(control.ss2tf(sys1), 1e-3))/s
-G_rudder_to_yaw1
-\end{lstlisting}
-
-\hypertarget{altitude-1}{%
-\subsection{Altitude}\label{altitude-1}}
-
-\begin{lstlisting}[language=Python]
-sys = control.ss(*linearize(
-    aircraft='F-35B-2',
-    states=['ic/w-fps'],
-    states_deriv = ['accelerations/wdot-ft_sec2'],
-    inputs=['fcs/throttle-cmd-norm'],
-    outputs=['ic/w-fps'],
-    ic=op_cruise,
-    dx=1e-3,
-    n_round=3
-))
-G_throttle_to_alt = -clean_tf(control.minreal(control.ss2tf(sys), 1e-3))/s
-G_throttle_to_alt
-\end{lstlisting}
-
-\begin{lstlisting}[language=Python]
-# Add the actuator 
-tau = 0.4
-G_act = tau / (s + tau)
-G_throttle_to_alt *= G_act
-G_throttle_to_alt
-\end{lstlisting}
-
-\begin{lstlisting}[language=Python]
-# !! <<<< THESE ARE FOR HOVER 
-# PD gains to lead-lag gains 
-Kp = 9.11459759968896e-10
-Kd = 0.00911454537591535
-N = 27.8343628363698
-
-c1 = N*Kd + Kp
-c2 = N*Kp
-c3 = 1
-c4 = N
-
-# >>>> SUBJECT TO CHANGE !!
+\PY{c+c1}{\PYZsh{} \PYZgt{}\PYZgt{}\PYZgt{}\PYZgt{} SUBJECT TO CHANGE !!}
 
 
 
 
+\PY{n}{H\PYZus{}elev\PYZus{}to\PYZus{}pitch} \PY{o}{=} \PY{p}{(}\PY{n}{c1} \PY{o}{*} \PY{n}{s} \PY{o}{+} \PY{n}{c2}\PY{p}{)} \PY{o}{/} \PY{p}{(}\PY{n}{c3} \PY{o}{*} \PY{n}{s} \PY{o}{+} \PY{n}{c4}\PY{p}{)}
+\PY{c+c1}{\PYZsh{} H\PYZus{}elev\PYZus{}to\PYZus{}pitch = 1 + 0.01*s}
+
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{n}{rootlocus}\PY{p}{(}\PY{n}{G\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{o}{*}\PY{n}{H\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{n}{rootlocus}\PY{p}{(}\PY{n}{G\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{o}{*}\PY{n}{H\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{xlim}\PY{p}{(}\PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mf}{1.5}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+
+\PY{n}{Gc\PYZus{}elev\PYZus{}to\PYZus{}pitch} \PY{o}{=} \PY{n}{G\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{o}{*}\PY{n}{H\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{o}{/}\PY{p}{(}\PY{l+m+mi}{1} \PY{o}{+} \PY{n}{G\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{o}{*}\PY{n}{H\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{p}{)}
+
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{n}{step\PYZus{}size} \PY{o}{=} \PY{l+m+mi}{10}
+\PY{n}{t}\PY{p}{,} \PY{n}{y} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{step\PYZus{}response}\PY{p}{(}\PY{n}{step\PYZus{}size}\PY{o}{*}\PY{n}{Gc\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{p}{,} \PY{n}{T}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{linspace}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{30}\PY{p}{,} \PY{l+m+mi}{1000}\PY{p}{)}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{t}\PY{p}{,} \PY{n}{y}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{pitch, deg}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{t, sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{output}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{c+c1}{\PYZsh{} actual error was computed in radians, so, converting back here}
+\PY{n}{e} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{n}{step\PYZus{}size}\PY{o}{\PYZhy{}}\PY{n}{y}\PY{p}{)}
+\PY{n}{t}\PY{p}{,} \PY{n}{u}\PY{p}{,} \PY{n}{\PYZus{}}\PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{forced\PYZus{}response}\PY{p}{(}\PY{n}{H\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{p}{,} \PY{n}{T}\PY{o}{=}\PY{n}{t}\PY{p}{,} \PY{n}{U}\PY{o}{=}\PY{n}{e}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{t}\PY{p}{,} \PY{n}{u}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{hlines}\PY{p}{(}\PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{t}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{t}\PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{linestyles}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{dashed}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{input}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{elevator, norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{t, sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{15}\PY{p}{,} \PY{l+m+mi}{7}\PY{p}{)}\PY{p}{)}
+\PY{n}{control}\PY{o}{.}\PY{n}{gangof4}\PY{p}{(}\PY{n}{G\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{p}{,} \PY{n}{H\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{p}{,} \PY{n}{Hz}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{dB}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{n}{control}\PY{o}{.}\PY{n}{nyquist}\PY{p}{(}\PY{n}{Gc\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{p}{,} \PY{n}{omega}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{logspace}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{3}\PY{p}{,} \PY{l+m+mi}{3}\PY{p}{,} \PY{l+m+mi}{1000}\PY{p}{)}\PY{p}{)}
+
+\PY{n}{gm}\PY{p}{,} \PY{n}{pm}\PY{p}{,} \PY{n}{wg}\PY{p}{,} \PY{n}{wp} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{margin}\PY{p}{(}\PY{n}{Gc\PYZus{}elev\PYZus{}to\PYZus{}pitch}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{gain margin: }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{gm}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{phase margin (in degrees): }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{pm}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Frequency for gain margin (at phase crossover, phase = \PYZhy{}180 degrees): }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{wg}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Frequency for phase margin (at gain crossover, gain = 1): }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{wp}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \hypertarget{roll}{%
+\subsection{Roll}\label{roll}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{sys} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{ss}\PY{p}{(}\PY{o}{*}\PY{n}{linearize}\PY{p}{(}
+    \PY{n}{aircraft}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{F\PYZhy{}35B\PYZhy{}2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+    \PY{n}{states}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/p\PYZhy{}rad\PYZus{}sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{states\PYZus{}deriv} \PY{o}{=} \PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/pdot\PYZhy{}rad\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{inputs}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/aileron\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{outputs}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/p\PYZhy{}rad\PYZus{}sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{ic}\PY{o}{=}\PY{n}{op\PYZus{}cruise}\PY{p}{,}
+    \PY{n}{dx}\PY{o}{=}\PY{l+m+mf}{1e\PYZhy{}3}\PY{p}{,}
+    \PY{n}{n\PYZus{}round}\PY{o}{=}\PY{l+m+mi}{3}
+\PY{p}{)}\PY{p}{)}
+\PY{n}{rad2deg} \PY{o}{=} \PY{l+m+mi}{180}\PY{o}{/}\PY{n}{np}\PY{o}{.}\PY{n}{pi}
+\PY{n}{s} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{tf}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
+\PY{n}{G\PYZus{}aileron\PYZus{}to\PYZus{}roll} \PY{o}{=} \PY{n}{rad2deg}\PY{o}{*}\PY{n}{clean\PYZus{}tf}\PY{p}{(}\PY{n}{control}\PY{o}{.}\PY{n}{minreal}\PY{p}{(}\PY{n}{control}\PY{o}{.}\PY{n}{ss2tf}\PY{p}{(}\PY{n}{sys}\PY{p}{)}\PY{p}{,} \PY{l+m+mf}{1e\PYZhy{}3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{n}{s}
+\PY{n}{G\PYZus{}aileron\PYZus{}to\PYZus{}roll}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} Add the actuator }
+\PY{n}{tau} \PY{o}{=} \PY{l+m+mf}{0.4}
+\PY{n}{G\PYZus{}act} \PY{o}{=} \PY{n}{tau} \PY{o}{/} \PY{p}{(}\PY{n}{s} \PY{o}{+} \PY{n}{tau}\PY{p}{)}
+\PY{n}{G\PYZus{}aileron\PYZus{}to\PYZus{}roll} \PY{o}{*}\PY{o}{=} \PY{n}{G\PYZus{}act}
+\PY{n}{G\PYZus{}aileron\PYZus{}to\PYZus{}roll}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} !! \PYZlt{}\PYZlt{}\PYZlt{}\PYZlt{} THESE ARE FOR HOVER }
+\PY{c+c1}{\PYZsh{} PD gains to lead\PYZhy{}lag gains }
+\PY{n}{Kp} \PY{o}{=} \PY{l+m+mf}{7.66302615547072e\PYZhy{}10}
+\PY{n}{Kd} \PY{o}{=} \PY{l+m+mf}{0.0076620813293718}
+\PY{n}{N} \PY{o}{=} \PY{l+m+mf}{505.040986830046}
+
+\PY{n}{c1} \PY{o}{=} \PY{n}{N}\PY{o}{*}\PY{n}{Kd} \PY{o}{+} \PY{n}{Kp}
+\PY{n}{c2} \PY{o}{=} \PY{n}{N}\PY{o}{*}\PY{n}{Kp}
+\PY{n}{c3} \PY{o}{=} \PY{l+m+mi}{1}
+\PY{n}{c4} \PY{o}{=} \PY{n}{N}
+
+\PY{c+c1}{\PYZsh{} \PYZgt{}\PYZgt{}\PYZgt{}\PYZgt{} SUBJECT TO CHANGE !!}
 
 
-H_throttle_to_alt = (c1 * s + c2) / (c3 * s + c4)
+
+\PY{n}{H\PYZus{}aileron\PYZus{}to\PYZus{}roll} \PY{o}{=} \PY{p}{(}\PY{n}{c1} \PY{o}{*} \PY{n}{s} \PY{o}{+} \PY{n}{c2}\PY{p}{)} \PY{o}{/} \PY{p}{(}\PY{n}{c3} \PY{o}{*} \PY{n}{s} \PY{o}{+} \PY{n}{c4}\PY{p}{)}
+
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{n}{rootlocus}\PY{p}{(}\PY{n}{G\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{o}{*}\PY{n}{H\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{n}{rootlocus}\PY{p}{(}\PY{n}{G\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{o}{*}\PY{n}{H\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{xlim}\PY{p}{(}\PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mf}{1.5}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+
+\PY{n}{Gc\PYZus{}aileron\PYZus{}to\PYZus{}roll}  \PY{o}{=} \PY{n}{G\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{o}{*}\PY{n}{H\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{o}{/}\PY{p}{(}\PY{l+m+mi}{1} \PY{o}{+} \PY{n}{G\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{o}{*}\PY{n}{H\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{p}{)}
 
 
-plt.figure()
-rootlocus(G_throttle_to_alt*H_throttle_to_alt)
-plt.plot([0, -1], [0, 1], '--')
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{n}{step\PYZus{}size} \PY{o}{=} \PY{l+m+mi}{10}
+\PY{n}{t}\PY{p}{,} \PY{n}{y} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{step\PYZus{}response}\PY{p}{(}\PY{n}{step\PYZus{}size}\PY{o}{*}\PY{n}{Gc\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{p}{,} \PY{n}{T}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{linspace}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{30}\PY{p}{,} \PY{l+m+mi}{1000}\PY{p}{)}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{t}\PY{p}{,} \PY{n}{y}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{t, sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{roll, deg}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{output}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
 
-plt.figure()
-rootlocus(G_throttle_to_alt*H_throttle_to_alt)
-plt.xlim([-1.2, 0])
-plt.plot([0, -1], [0, 1], '--')
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{c+c1}{\PYZsh{} actual error was computed in radians, so, converting back here}
+\PY{n}{e} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{deg2rad}\PY{p}{(}\PY{n}{step\PYZus{}size}\PY{o}{\PYZhy{}}\PY{n}{y}\PY{p}{)}
+\PY{n}{t}\PY{p}{,} \PY{n}{u}\PY{p}{,} \PY{n}{\PYZus{}}\PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{forced\PYZus{}response}\PY{p}{(}\PY{n}{H\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{p}{,} \PY{n}{T}\PY{o}{=}\PY{n}{t}\PY{p}{,} \PY{n}{U}\PY{o}{=}\PY{n}{e}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{hlines}\PY{p}{(}\PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mf}{0.1}\PY{p}{,} \PY{l+m+mf}{0.1}\PY{p}{]}\PY{p}{,} \PY{n}{t}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{t}\PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{linestyles}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{dashed}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{t}\PY{p}{,} \PY{n}{u}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{t, sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{aileron }\PY{l+s+s1}{\PYZpc{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{input}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
 
-Gc_throttle_to_alt = G_throttle_to_alt*H_throttle_to_alt/(1 + G_throttle_to_alt*H_throttle_to_alt)
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{n}{control}\PY{o}{.}\PY{n}{nyquist}\PY{p}{(}\PY{n}{Gc\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{p}{,} \PY{n}{omega}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{logspace}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{3}\PY{p}{,} \PY{l+m+mi}{3}\PY{p}{,} \PY{l+m+mi}{1000}\PY{p}{)}\PY{p}{)}
 
-plt.figure()
-step_size = 10
-t, y = control.step_response(step_size*Gc_throttle_to_alt, T=np.linspace(0, 40, 1000))
-plt.plot(t, y)
-plt.xlabel('t, sec')
-plt.ylabel('altitude, ft')
-plt.title('output')
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{15}\PY{p}{,} \PY{l+m+mi}{7}\PY{p}{)}\PY{p}{)}
+\PY{n}{control}\PY{o}{.}\PY{n}{gangof4}\PY{p}{(}\PY{n}{G\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{p}{,} \PY{n}{H\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{p}{,} \PY{n}{Hz}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{dB}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
 
-plt.figure()
-# error computed in ft
-e = step_size-y
-t, u, _= control.forced_response(H_throttle_to_alt, T=t, U=e)
-plt.hlines([-0.1, 0.1], t[0], t[-1], linestyles='dashed')
-plt.plot(t, u)
-plt.xlabel('t, sec')
-plt.ylabel('throtle %')
-plt.title('input')
+\PY{n}{gm}\PY{p}{,} \PY{n}{pm}\PY{p}{,} \PY{n}{wg}\PY{p}{,} \PY{n}{wp} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{margin}\PY{p}{(}\PY{n}{Gc\PYZus{}aileron\PYZus{}to\PYZus{}roll}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{gain margin: }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{gm}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{phase margin (in degrees): }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{pm}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Frequency for gain margin (at phase crossover, phase = \PYZhy{}180 degrees): }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{wg}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Frequency for phase margin (at gain crossover, gain = 1): }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{wp}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
 
-plt.figure()
-control.nyquist(Gc_throttle_to_alt, omega=np.logspace(-3, 3, 1000))
+    \hypertarget{yaw}{%
+\subsection{Yaw}\label{yaw}}
 
-plt.figure(figsize=(15, 7))
-control.gangof4(G_throttle_to_alt, H_throttle_to_alt, Hz=True, dB=True)
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{sys1} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{ss}\PY{p}{(}\PY{o}{*}\PY{n}{linearize}\PY{p}{(}
+    \PY{n}{aircraft}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{F\PYZhy{}35B\PYZhy{}2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+    \PY{n}{states}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/r\PYZhy{}rad\PYZus{}sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{states\PYZus{}deriv} \PY{o}{=} \PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/rdot\PYZhy{}rad\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{inputs}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{propulsion/engine/pitch\PYZhy{}angle\PYZhy{}rad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{outputs}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/r\PYZhy{}rad\PYZus{}sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{ic}\PY{o}{=}\PY{n}{op\PYZus{}hover}\PY{p}{,}
+    \PY{n}{dx}\PY{o}{=}\PY{l+m+mf}{1e\PYZhy{}3}\PY{p}{,}
+    \PY{n}{n\PYZus{}round}\PY{o}{=}\PY{l+m+mi}{3}
+\PY{p}{)}\PY{p}{)}
+\PY{n}{s} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{tf}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
+
+\PY{c+c1}{\PYZsh{} \PYZsh{} G\PYZus{}rudder\PYZus{}to\PYZus{}yaw = \PYZhy{}clean\PYZus{}tf(control.minreal(control.ss2tf(sys), 1e\PYZhy{}3))/s}
+\PY{c+c1}{\PYZsh{} print(sys)}
+\PY{c+c1}{\PYZsh{} temp = scysig.ss2tf(sys.A, sys.B, sys.C, sys.D)}
+\PY{c+c1}{\PYZsh{} print(temp)}
+
+\PY{n}{G\PYZus{}rudder\PYZus{}to\PYZus{}yaw1} \PY{o}{=} \PY{o}{\PYZhy{}}\PY{n}{clean\PYZus{}tf}\PY{p}{(}\PY{n}{control}\PY{o}{.}\PY{n}{minreal}\PY{p}{(}\PY{n}{control}\PY{o}{.}\PY{n}{ss2tf}\PY{p}{(}\PY{n}{sys1}\PY{p}{)}\PY{p}{,} \PY{l+m+mf}{1e\PYZhy{}3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{n}{s}
+\PY{n}{G\PYZus{}rudder\PYZus{}to\PYZus{}yaw1}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \hypertarget{altitude}{%
+\subsection{Altitude}\label{altitude}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{sys} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{ss}\PY{p}{(}\PY{o}{*}\PY{n}{linearize}\PY{p}{(}
+    \PY{n}{aircraft}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{F\PYZhy{}35B\PYZhy{}2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+    \PY{n}{states}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/w\PYZhy{}fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{states\PYZus{}deriv} \PY{o}{=} \PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{accelerations/wdot\PYZhy{}ft\PYZus{}sec2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{inputs}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fcs/throttle\PYZhy{}cmd\PYZhy{}norm}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{outputs}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ic/w\PYZhy{}fps}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+    \PY{n}{ic}\PY{o}{=}\PY{n}{op\PYZus{}cruise}\PY{p}{,}
+    \PY{n}{dx}\PY{o}{=}\PY{l+m+mf}{1e\PYZhy{}3}\PY{p}{,}
+    \PY{n}{n\PYZus{}round}\PY{o}{=}\PY{l+m+mi}{3}
+\PY{p}{)}\PY{p}{)}
+\PY{n}{G\PYZus{}throttle\PYZus{}to\PYZus{}alt} \PY{o}{=} \PY{o}{\PYZhy{}}\PY{n}{clean\PYZus{}tf}\PY{p}{(}\PY{n}{control}\PY{o}{.}\PY{n}{minreal}\PY{p}{(}\PY{n}{control}\PY{o}{.}\PY{n}{ss2tf}\PY{p}{(}\PY{n}{sys}\PY{p}{)}\PY{p}{,} \PY{l+m+mf}{1e\PYZhy{}3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{n}{s}
+\PY{n}{G\PYZus{}throttle\PYZus{}to\PYZus{}alt}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} Add the actuator }
+\PY{n}{tau} \PY{o}{=} \PY{l+m+mf}{0.4}
+\PY{n}{G\PYZus{}act} \PY{o}{=} \PY{n}{tau} \PY{o}{/} \PY{p}{(}\PY{n}{s} \PY{o}{+} \PY{n}{tau}\PY{p}{)}
+\PY{n}{G\PYZus{}throttle\PYZus{}to\PYZus{}alt} \PY{o}{*}\PY{o}{=} \PY{n}{G\PYZus{}act}
+\PY{n}{G\PYZus{}throttle\PYZus{}to\PYZus{}alt}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} !! \PYZlt{}\PYZlt{}\PYZlt{}\PYZlt{} THESE ARE FOR HOVER }
+\PY{c+c1}{\PYZsh{} PD gains to lead\PYZhy{}lag gains }
+\PY{n}{Kp} \PY{o}{=} \PY{l+m+mf}{9.11459759968896e\PYZhy{}10}
+\PY{n}{Kd} \PY{o}{=} \PY{l+m+mf}{0.00911454537591535}
+\PY{n}{N} \PY{o}{=} \PY{l+m+mf}{27.8343628363698}
+
+\PY{n}{c1} \PY{o}{=} \PY{n}{N}\PY{o}{*}\PY{n}{Kd} \PY{o}{+} \PY{n}{Kp}
+\PY{n}{c2} \PY{o}{=} \PY{n}{N}\PY{o}{*}\PY{n}{Kp}
+\PY{n}{c3} \PY{o}{=} \PY{l+m+mi}{1}
+\PY{n}{c4} \PY{o}{=} \PY{n}{N}
+
+\PY{c+c1}{\PYZsh{} \PYZgt{}\PYZgt{}\PYZgt{}\PYZgt{} SUBJECT TO CHANGE !!}
 
 
-gm, pm, wg, wp = control.margin(Gc_throttle_to_alt)
-print('gain margin: ', gm)
-print('phase margin (in degrees): ', pm)
-print('Frequency for gain margin (at phase crossover, phase = -180 degrees): ', wg)
-print('Frequency for phase margin (at gain crossover, gain = 1): ', wp)
-\end{lstlisting}
+
+
+
+
+\PY{n}{H\PYZus{}throttle\PYZus{}to\PYZus{}alt} \PY{o}{=} \PY{p}{(}\PY{n}{c1} \PY{o}{*} \PY{n}{s} \PY{o}{+} \PY{n}{c2}\PY{p}{)} \PY{o}{/} \PY{p}{(}\PY{n}{c3} \PY{o}{*} \PY{n}{s} \PY{o}{+} \PY{n}{c4}\PY{p}{)}
+
+
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{n}{rootlocus}\PY{p}{(}\PY{n}{G\PYZus{}throttle\PYZus{}to\PYZus{}alt}\PY{o}{*}\PY{n}{H\PYZus{}throttle\PYZus{}to\PYZus{}alt}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{n}{rootlocus}\PY{p}{(}\PY{n}{G\PYZus{}throttle\PYZus{}to\PYZus{}alt}\PY{o}{*}\PY{n}{H\PYZus{}throttle\PYZus{}to\PYZus{}alt}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{xlim}\PY{p}{(}\PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mf}{1.2}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+
+\PY{n}{Gc\PYZus{}throttle\PYZus{}to\PYZus{}alt} \PY{o}{=} \PY{n}{G\PYZus{}throttle\PYZus{}to\PYZus{}alt}\PY{o}{*}\PY{n}{H\PYZus{}throttle\PYZus{}to\PYZus{}alt}\PY{o}{/}\PY{p}{(}\PY{l+m+mi}{1} \PY{o}{+} \PY{n}{G\PYZus{}throttle\PYZus{}to\PYZus{}alt}\PY{o}{*}\PY{n}{H\PYZus{}throttle\PYZus{}to\PYZus{}alt}\PY{p}{)}
+
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{n}{step\PYZus{}size} \PY{o}{=} \PY{l+m+mi}{10}
+\PY{n}{t}\PY{p}{,} \PY{n}{y} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{step\PYZus{}response}\PY{p}{(}\PY{n}{step\PYZus{}size}\PY{o}{*}\PY{n}{Gc\PYZus{}throttle\PYZus{}to\PYZus{}alt}\PY{p}{,} \PY{n}{T}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{linspace}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{40}\PY{p}{,} \PY{l+m+mi}{1000}\PY{p}{)}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{t}\PY{p}{,} \PY{n}{y}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{t, sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{altitude, ft}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{output}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{c+c1}{\PYZsh{} error computed in ft}
+\PY{n}{e} \PY{o}{=} \PY{n}{step\PYZus{}size}\PY{o}{\PYZhy{}}\PY{n}{y}
+\PY{n}{t}\PY{p}{,} \PY{n}{u}\PY{p}{,} \PY{n}{\PYZus{}}\PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{forced\PYZus{}response}\PY{p}{(}\PY{n}{H\PYZus{}throttle\PYZus{}to\PYZus{}alt}\PY{p}{,} \PY{n}{T}\PY{o}{=}\PY{n}{t}\PY{p}{,} \PY{n}{U}\PY{o}{=}\PY{n}{e}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{hlines}\PY{p}{(}\PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mf}{0.1}\PY{p}{,} \PY{l+m+mf}{0.1}\PY{p}{]}\PY{p}{,} \PY{n}{t}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{t}\PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{linestyles}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{dashed}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{t}\PY{p}{,} \PY{n}{u}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{t, sec}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{throtle }\PY{l+s+s1}{\PYZpc{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{input}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{n}{control}\PY{o}{.}\PY{n}{nyquist}\PY{p}{(}\PY{n}{Gc\PYZus{}throttle\PYZus{}to\PYZus{}alt}\PY{p}{,} \PY{n}{omega}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{logspace}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{3}\PY{p}{,} \PY{l+m+mi}{3}\PY{p}{,} \PY{l+m+mi}{1000}\PY{p}{)}\PY{p}{)}
+
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{15}\PY{p}{,} \PY{l+m+mi}{7}\PY{p}{)}\PY{p}{)}
+\PY{n}{control}\PY{o}{.}\PY{n}{gangof4}\PY{p}{(}\PY{n}{G\PYZus{}throttle\PYZus{}to\PYZus{}alt}\PY{p}{,} \PY{n}{H\PYZus{}throttle\PYZus{}to\PYZus{}alt}\PY{p}{,} \PY{n}{Hz}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{dB}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+
+
+\PY{n}{gm}\PY{p}{,} \PY{n}{pm}\PY{p}{,} \PY{n}{wg}\PY{p}{,} \PY{n}{wp} \PY{o}{=} \PY{n}{control}\PY{o}{.}\PY{n}{margin}\PY{p}{(}\PY{n}{Gc\PYZus{}throttle\PYZus{}to\PYZus{}alt}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{gain margin: }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{gm}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{phase margin (in degrees): }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{pm}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Frequency for gain margin (at phase crossover, phase = \PYZhy{}180 degrees): }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{wg}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Frequency for phase margin (at gain crossover, gain = 1): }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{wp}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+
+    % Add a bibliography block to the postdoc
+    
+    
+    
+\end{document}

@@ -4,12 +4,12 @@
 
 	<!-- Model -->
 
-	<path>F-35B.ac</path>
+	<path>product.ac</path>
 	
-	<model>
+	<!-- <model>
 		<usage>interior</usage>
 		<path>Aircraft/F-35B-2/Models/Cockpit.xml</path>
-	</model>
+	</model> -->
 	
 	<!-- Rembrandt -->
 	
@@ -27,7 +27,7 @@
 	
 	<!-- Turns off non Rembrant lighting and effects -->
 	
-	<animation>
+	<!-- <animation>
 		<type>select</type>
 		<object-name>Taxi-Light-Left</object-name>
 		<object-name>Taxi-Light-Right</object-name>
@@ -40,26 +40,26 @@
 				<property>/sim/rendering/rembrandt/enabled</property>
 			</not>
 		</condition>
-	</animation>
+	</animation> -->
 	
 	<!-- Lights -->
 	
-	<model>
+	<!-- <model>
 		<path>Aircraft/F-35B-2/Models/Lights.xml</path>
-	</model>
+	</model> -->
 	
-	<!-- Effects -->
+	<!-- Effects 
 	<model>
 		<path>Aircraft/F-35B-2/Models/Effects.xml</path>
-	</model>
+	</model> -->
 	
-	<!-- MP sound call -->
+	<!-- MP sound call 
 	
 	<sound>
 		<path>Aircraft/F-35B-2/Sounds/MP-Sound.xml</path>
-	</sound>
+	</sound> -->
 
-	<!-- Submodels -->
+	<!-- Submodels 
 	
 	<model>
 		<path>Aircraft/F-35B-2/Models/Engine.xml</path>
@@ -77,8 +77,9 @@
 			<y-m>0</y-m>
 			<z-m>0</z-m>
 		</offsets>
-	</model>
+	</model> -->
 	
+<!-- 
 	<model>
 		<path>Aircraft/F-35B-2/Models/Payload.xml</path>
 		<offsets>
@@ -86,18 +87,18 @@
 			<y-m>0</y-m>
 			<z-m>0</z-m>
 		</offsets>
-	</model>
+	</model> -->
 
 	<!-- Versions -->
 
-	<animation>
+	<!-- <animation>
 		<type>select</type>
 		<object-name>pylons</object-name>
 		<condition>
 			<property>sim/model/livery/pylons</property>
 			<value type="bool">false</value>
 		</condition>
-	</animation>
+	</animation> -->
 
 	<!-- Livery -->
 

@@ -843,7 +843,7 @@
       
     
     <!-- yaw control with engine pitching -->
-    <channel name ="RightEngineThrustVector">
+<!--     <channel name ="RightEngineThrustVector">
       <summer name="ap/yaw-error-deg">
         <input>ap/heading-cmd-deg</input>
         <input>-attitude/psi-deg</input>
@@ -922,7 +922,7 @@
         <gain>1</gain>
         <output>propulsion/engine[3]/pitch-angle-rad</output>
       </pure_gain>
-    </channel>  
+    </channel>   -->
       
     <!-- yaw control w/ rudder -->
     <channel name="Yaw">
@@ -1131,7 +1131,7 @@
     </channel>
 
       
-    <channel name="Engine0_Pitch">
+<!--     <channel name="Engine0_Pitch">
       <summer name="ap/engine0-pitch-cmd-norm">
         <input>-ap/rudder-cmd-norm</input>
         <input>ap/thrustvector_to_pitch0</input>
@@ -1149,7 +1149,7 @@
             <max>120</max>
         </clipto>
       </pure_gain>
-    </channel>
+    </channel> -->
       
     <channel name="Engine1">
       <pure_gain name="ap/elevator_to_engine1">
@@ -1173,7 +1173,7 @@
     </channel>
 
       
-    <channel name="Engine1_Pitch">
+<!--     <channel name="Engine1_Pitch">
       <summer name="ap/engine1-pitch-cmd-norm">
         <input>-ap/rudder-cmd-norm</input>
         <input>ap/thrustvector_to_pitch1</input>
@@ -1191,7 +1191,7 @@
             <max>120</max>
         </clipto>
       </pure_gain>
-    </channel>
+    </channel> -->
       
     <channel name="Engine2">
       <pure_gain name="ap/elevator_to_engine2">
@@ -1215,7 +1215,7 @@
     </channel>
 
       
-    <channel name="Engine2_Pitch">
+<!--     <channel name="Engine2_Pitch">
       <summer name="ap/engine2-pitch-cmd-norm">
         <input>ap/rudder-cmd-norm</input>
         <input>ap/thrustvector_to_pitch2</input>
@@ -1233,7 +1233,7 @@
             <max>120</max>
         </clipto>
       </pure_gain>
-    </channel>
+    </channel> -->
       
     <channel name="Engine3">
       <pure_gain name="ap/elevator_to_engine3">
@@ -1256,7 +1256,7 @@
       </summer>
     </channel>
 
-    <channel name="Engine3_Pitch">
+<!--     <channel name="Engine3_Pitch">
       <summer name="ap/engine3-pitch-cmd-norm">
         <input>-ap/rudder-cmd-norm</input>
         <input>ap/thrustvector_to_pitch3</input>
@@ -1274,7 +1274,7 @@
             <max>120</max>
         </clipto>
       </pure_gain>
-    </channel>
+    </channel> -->
       
   </flight_control>
   
